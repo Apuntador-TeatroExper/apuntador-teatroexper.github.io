@@ -6,14 +6,18 @@
 <meta name="theme-color" content="#14101a">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Apuntador">
 <title>El Apuntador</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
 <style>
 :root{
-  /* Un solo mundo visual: escenario a oscuras, foco dorado para tu papel, terciopelo para la acción */
+  /* Un solo mundo visual: escenario a oscuras, foco dorado para tu papel, terciopelo para dirección y bucles */
   --bg:#14101a; --surface:#1e1726; --raise:#291f33; --line:#3a2f46;
   --text:#f4ede6; --muted:#a99db2;
   --gold:#f1b84b; --gold-ink:#2b1b00; --velvet:#d0435c;
@@ -29,18 +33,19 @@ body{background:var(--bg);color:var(--text);font-family:var(--f-body);font-size:
 button,input,select,textarea{font:inherit;color:inherit}
 :focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 .app{min-height:100%;display:flex;flex-direction:column}
-header.top{position:sticky;top:0;z-index:20;background:linear-gradient(var(--bg) 70%,transparent);padding:14px 16px 10px}
+header.top{position:sticky;top:0;z-index:20;background:linear-gradient(var(--bg) 70%,transparent);padding:calc(14px + env(safe-area-inset-top,0px)) 16px 10px}
 .top-in{max-width:760px;margin:0 auto;display:flex;align-items:center;gap:12px}
 .brand{font-family:var(--f-display);font-size:1.45rem;letter-spacing:.01em;white-space:nowrap}
 .brand em{color:var(--gold)}
-.top-play{margin-left:auto;min-width:0;max-width:55%}
+.top-play{margin-left:auto;min-width:0;max-width:58%}
 .top-play select{width:100%;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-size:.9rem}
-main{flex:1;width:100%;max-width:760px;margin:0 auto;padding:4px 16px 110px}
-nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:30;background:rgba(20,16,26,.96);border-top:1px solid var(--line);backdrop-filter:blur(8px)}
+main{flex:1;width:100%;max-width:760px;margin:0 auto;padding:4px 16px 120px}
+nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:30;background:rgba(20,16,26,.96);border-top:1px solid var(--line);backdrop-filter:blur(8px);padding-bottom:env(safe-area-inset-bottom,0px)}
 .tabs-in{max-width:760px;margin:0 auto;display:grid;grid-template-columns:repeat(6,1fr)}
 .tab{background:none;border:0;padding:10px 2px 12px;display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--muted);font-size:.72rem;cursor:pointer}
 .tab svg{width:22px;height:22px}
 .tab[aria-current="page"]{color:var(--gold)}
+.tab[disabled]{opacity:.35;cursor:not-allowed}
 h1,h2,h3{font-family:var(--f-display);font-weight:400;text-wrap:balance;margin:0}
 h1{font-size:2.1rem;line-height:1.1}
 h1 em,h2 em{color:var(--gold)}
@@ -61,21 +66,26 @@ h3{font-size:1.15rem}
 .btn[disabled]{opacity:.45;cursor:not-allowed}
 .btn.rec{border-color:var(--velvet);color:#fff;background:var(--velvet)}
 label.f{display:flex;flex-direction:column;gap:6px;font-size:.88rem;color:var(--muted)}
-input[type=text],select,textarea{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px;color:var(--text);width:100%}
+label.chk{display:flex;gap:10px;align-items:center;font-size:.92rem}
+input[type=text],input[type=date],select,textarea{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px;color:var(--text);width:100%}
 textarea{min-height:220px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.85rem;line-height:1.45}
+textarea.prose{font-family:var(--f-body);font-size:.95rem;min-height:90px}
 input[type=range]{accent-color:var(--gold);width:100%}
+input[type=checkbox]{accent-color:var(--gold);width:20px;height:20px}
 .seg{display:inline-flex;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:3px;gap:3px;flex-wrap:wrap}
 .seg button{border:0;background:transparent;padding:7px 12px;border-radius:9px;cursor:pointer;font-size:.86rem;color:var(--muted)}
 .seg button[aria-pressed="true"]{background:var(--raise);color:var(--text);box-shadow:inset 0 0 0 1px var(--gold)}
-.chip{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:3px 10px;font-size:.78rem;border:1px solid var(--line);color:var(--muted)}
+.chip{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:3px 10px;font-size:.78rem;border:1px solid var(--line);color:var(--muted);white-space:nowrap}
 .chip.me{border-color:var(--gold);color:var(--gold)}
 .chip.ok{border-color:var(--ok);color:var(--ok)}
 .chip.mid{border-color:var(--warn);color:var(--warn)}
-.chip.rec{border-color:var(--velvet);color:var(--velvet)}
+.chip.rec,.chip.loop{border-color:var(--velvet);color:var(--velvet)}
 
 /* Inicio */
 .hero{padding:18px 0 6px}
 .hero p{margin:.4rem 0 0;max-width:46ch}
+.countdown{display:inline-flex;align-items:baseline;gap:8px;margin-top:10px;border:1px solid var(--gold);border-radius:999px;padding:4px 14px;color:var(--gold)}
+.countdown b{font-family:var(--f-display);font-weight:400;font-size:1.4rem;font-variant-numeric:tabular-nums}
 .play-card{display:grid;grid-template-columns:auto 1fr;gap:18px;align-items:center}
 .ring{width:108px;height:108px}
 .ring text{font-family:var(--f-display);fill:var(--text)}
@@ -84,43 +94,61 @@ input[type=range]{accent-color:var(--gold);width:100%}
 .stat b{display:block;font-family:var(--f-display);font-size:1.5rem;font-weight:400;font-variant-numeric:tabular-nums}
 .stat span{font-size:.75rem;color:var(--muted)}
 .list-item{display:flex;align-items:center;gap:12px;padding:12px 0;border-top:1px solid var(--line)}
-.list-item:first-child{border-top:0}
+.list-item:first-of-type{border-top:0}
 .list-item .grow{flex:1;min-width:0}
+.sub{font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:14px 0 2px}
 
 /* Libreto */
 .script{display:flex;flex-direction:column;gap:2px}
-.it{border-radius:12px;padding:10px 12px;border:1px solid transparent;scroll-margin:120px}
-.it.scene{font-family:var(--f-display);font-size:1.2rem;color:var(--gold);padding-top:22px;border-bottom:1px solid var(--line);border-radius:0}
+.it{border-radius:12px;padding:10px 12px;border:1px solid transparent;border-right-width:3px;scroll-margin:140px}
+.it.scene{font-family:var(--f-display);font-size:1.2rem;color:var(--gold);padding-top:22px;border-bottom:1px solid var(--line);border-radius:0;cursor:pointer}
 .it.dir{font-style:italic;color:var(--muted);font-size:.92rem;padding-left:24px}
 .it.ln{display:grid;grid-template-columns:9rem 1fr;gap:12px;cursor:pointer}
 .it.ln:hover{background:var(--surface)}
 .who{font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding-top:3px;font-weight:700}
+.who small{display:block;text-transform:none;letter-spacing:0;font-weight:400;font-size:.75rem}
 .it.mine{background:linear-gradient(90deg,rgba(241,184,75,.10),transparent 70%);box-shadow:inset 3px 0 0 var(--gold)}
 .it.mine .who{color:var(--gold)}
+.it.inloop{border-right-color:var(--velvet)}
 .it.now{background:var(--raise);border-color:var(--gold)}
+.it.now.inloop{border-right-color:var(--velvet)}
 .it.now.mine.wait{animation:pulse 1.6s ease-in-out infinite}
 @keyframes pulse{50%{box-shadow:inset 3px 0 0 var(--gold),0 0 0 4px rgba(241,184,75,.22)}}
 .note{font-style:italic;color:var(--muted)}
 .gap{color:var(--gold);letter-spacing:.05em}
 .hid{display:inline-block;color:var(--gold);border:1px dashed var(--gold);border-radius:8px;padding:2px 10px;font-size:.88rem}
-.ini{color:var(--text)}
 .ini i{color:var(--muted);font-style:normal;letter-spacing:.08em}
+mark.miss{background:rgba(208,67,92,.22);color:#ffb3c0;border-radius:4px;padding:0 2px;text-decoration:underline wavy var(--velvet)}
 .recdot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--velvet);margin-left:6px;vertical-align:middle}
+.anns{grid-column:2;display:flex;flex-direction:column;gap:4px;margin-top:6px}
+.ann{font-size:.85rem;color:var(--muted);border-left:2px solid var(--line);padding:2px 0 2px 10px;text-align:left}
+.ann b{font-weight:700;color:var(--text);font-size:.78rem;letter-spacing:.03em}
+.ann.dir{border-left-color:var(--velvet)}
+.ann.dir b{color:var(--velvet)}
+.ann.mineN{border-left-color:var(--gold)}
 @media (max-width:560px){
   .it.ln{grid-template-columns:1fr;gap:2px}
+  .anns{grid-column:1}
   .stats{grid-template-columns:repeat(2,1fr)}
   .play-card{grid-template-columns:1fr;justify-items:start}
   h1{font-size:1.8rem}
 }
 
 /* Barra de ensayo */
-.runbar{position:sticky;top:62px;z-index:10;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:12px;display:flex;flex-direction:column;gap:10px;margin-bottom:12px}
-.runstatus{display:flex;align-items:center;gap:10px;min-height:24px;font-size:.92rem}
-.bar{height:6px;background:var(--bg);border-radius:6px;overflow:hidden;flex:1}
+.runbar{position:sticky;top:calc(62px + env(safe-area-inset-top,0px));z-index:10;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:12px;display:flex;flex-direction:column;gap:10px;margin-bottom:12px;max-height:70vh;overflow:auto}
+.runstatus{display:flex;align-items:center;gap:10px;min-height:24px;font-size:.92rem;flex-wrap:wrap}
+.bar{height:6px;background:var(--bg);border-radius:6px;overflow:hidden;flex:1;min-width:80px}
 .bar>div{height:100%;width:0;background:var(--gold);transition:width .2s linear}
 .yourturn{color:var(--gold);font-weight:700}
+.live{flex-basis:100%;font-size:.85rem;color:var(--muted);font-style:italic;min-height:1.2em}
 .opts{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .opts .lbl{font-size:.78rem;color:var(--muted);margin-right:-2px}
+.opts select{width:auto;max-width:100%;padding:6px 10px;font-size:.86rem}
+details.more summary{cursor:pointer;font-size:.86rem;color:var(--muted);list-style:none}
+details.more summary::-webkit-details-marker{display:none}
+details.more summary::before{content:"+ "}
+details.more[open] summary::before{content:"– "}
+details.more[open]{display:flex;flex-direction:column;gap:10px}
 
 /* Memorizar */
 .flash{display:flex;flex-direction:column;gap:16px}
@@ -134,19 +162,19 @@ input[type=range]{accent-color:var(--gold);width:100%}
 
 /* Grabar */
 .recrow{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:12px 0;border-top:1px solid var(--line)}
-.recrow:first-child{border-top:0}
 .recrow .txt{font-size:.95rem}
 .recrow .acts{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
 
-.toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:var(--raise);border:1px solid var(--gold);border-radius:12px;padding:10px 16px;z-index:50;max-width:min(92vw,520px);font-size:.92rem;box-shadow:0 10px 30px rgba(0,0,0,.4)}
-.modal-bg{position:fixed;inset:0;background:rgba(10,8,14,.75);z-index:60;display:flex;align-items:center;justify-content:center;padding:16px}
-.modal{background:var(--surface);border:1px solid var(--gold);border-radius:20px;padding:24px;max-width:440px;width:100%;text-align:center;display:flex;flex-direction:column;gap:12px}
-.modal h2{font-size:1.8rem}
+.toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%);background:var(--raise);border:1px solid var(--gold);border-radius:12px;padding:10px 16px;z-index:70;max-width:min(92vw,520px);font-size:.92rem;box-shadow:0 10px 30px rgba(0,0,0,.4)}
+.modal-bg{position:fixed;inset:0;background:rgba(10,8,14,.78);z-index:60;display:flex;align-items:center;justify-content:center;padding:16px}
+.modal{background:var(--surface);border:1px solid var(--gold);border-radius:20px;padding:22px;max-width:480px;width:100%;display:flex;flex-direction:column;gap:12px;max-height:90vh;overflow:auto}
+.modal.center{text-align:center}
+.modal h2{font-size:1.7rem}
 details.card summary{cursor:pointer;font-family:var(--f-display);font-size:1.15rem;list-style:none}
 details.card summary::-webkit-details-marker{display:none}
 details.card summary::after{content:"+";float:right;color:var(--gold)}
 details.card[open] summary::after{content:"–"}
-.castrow{display:grid;grid-template-columns:8.5rem 1fr 7rem auto;gap:10px;align-items:center;padding:10px 0;border-top:1px solid var(--line)}
+.castrow{display:grid;grid-template-columns:9rem 1fr 7rem auto;gap:10px;align-items:center;padding:10px 0;border-top:1px solid var(--line)}
 @media (max-width:560px){.castrow{grid-template-columns:1fr 1fr}.castrow .nm{grid-column:1/-1}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 </style>
@@ -166,9 +194,9 @@ details.card[open] summary::after{content:"–"}
 <div id="overlay"></div>
 
 <script>
-/* ============ Personalización fija (rellenar para regalarla ya montada) ============ */
-const PERSONA_DEFAULT = "";        // p. ej. "Maite"  → saludo personal
-const GRUPO_DEFAULT   = "";        // p. ej. "Grupo de teatro Txirimiri"
+/* ============ Personalización fija (opcional) ============ */
+const PERSONA_DEFAULT = "";
+const GRUPO_DEFAULT   = "";
 
 /* ============ Utilidades ============ */
 const $ = s => document.querySelector(s);
@@ -176,125 +204,122 @@ const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 const uid = () => Math.random().toString(36).slice(2, 10);
 function hash(s){ let h = 2166136261; for (const c of s){ h ^= c.codePointAt(0); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); }
-const title = s => s.toLowerCase().replace(/(^|[\s\-'])(\S)/g, (m,a,b) => a + b.toUpperCase());
-const words = s => (s.trim().match(/\S+/g) || []).length;
-const today = () => new Date().toISOString().slice(0,10);
+const title = s => String(s).toLowerCase().replace(/(^|[\s\-'(])(\S)/g, (m,a,b) => a + b.toUpperCase());
+const sentence = s => s === s.toUpperCase() ? s.charAt(0) + s.slice(1).toLowerCase() : s;
+const words = s => (String(s).trim().match(/\S+/g) || []).length;
+const dayStr = d => { const x = new Date(d); x.setMinutes(x.getMinutes() - x.getTimezoneOffset()); return x.toISOString().slice(0,10); };
+const today = () => dayStr(new Date());
+const fmtDate = s => { try { return new Date(s + "T12:00:00").toLocaleDateString("es-ES", { day: "numeric", month: "long", year: "numeric" }); } catch(e){ return s; } };
+const norm = s => String(s).toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9ñ|]+/g, " ").trim();
 const IN_FRAME = (() => { try { return window.self !== window.top; } catch(e){ return true; } })();
 const REDUCED = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+const isGroup = ch => /^(TOD[AOE]S|TODOS LOS PERSONAJES|TODAS LAS ACTRICES|TODO EL MUNDO|CORO)$/.test(ch);
 
-/* ============ Parser del libreto ============ */
+/* ============ Lector del libreto ============ */
 const UP = "A-ZÁÉÍÓÚÜÑÀÈÌÒÙÇ";
-const reScene = /^(ACTO|ESCENA|CUADRO|PR[ÓO]LOGO|EP[ÍI]LOGO|ESCENARIO)\b/i;
-const reColon = new RegExp("^([" + UP + "a-záéíóúüñàèìòùç][\\wÁÉÍÓÚÜÑáéíóúüñÀÈÌÒÙàèìòùÇç .'\\-]{0,38}?)\\s*(?:\\(([^)]*)\\))?\\s*[:：]\\s*(.*)$");
+const reScene = /^(ACTO|ESCENA|CUADRO|PR[ÓO]LOGO|EP[ÍI]LOGO)\b/i;
+const reSpeaker = new RegExp("^([" + UP + "a-záéíóúüñàèìòùç][\\wÁÉÍÓÚÜÑáéíóúüñÀÈÌÒÙàèìòùÇç .'\\-]{0,38}?)\\s*(?:\\(([^)]*)\\))?\\s*(?:,\\s*([^:：()]{1,90}?))?\\s*[:：]\\s*(.*)$");
 const reDot   = new RegExp("^([" + UP + "][" + UP + " .'\\-]{1,38}?)\\s*(?:\\(([^)]*)\\))?\\.\\s+(.+)$");
 const reAlone = new RegExp("^([" + UP + "][" + UP + " .'\\-]{1,38})\\s*(?:\\(([^)]*)\\))?$");
-
-function isName(s){
+const keyOf = s => s.toUpperCase().replace(/\s+/g, " ").trim();
+function personLike(s){ const w = s.trim().split(/\s+/); return !!s.trim() && w.length <= 3 && w.every(x => /^[A-ZÁÉÍÓÚÜÑ][a-záéíóúüñ]+$/.test(x)); }
+function isName(s, strict){
   s = s.trim(); const w = s.split(/\s+/);
   if (!s || w.length > 4 || /^https?$/i.test(s)) return false;
-  if (s === s.toUpperCase()) return true;
+  if (s === s.toUpperCase() && /[A-ZÁÉÍÓÚÑ]/.test(s)) return true;
+  if (strict) return false;
   const small = /^(de|del|la|el|los|las|y)$/;
   return w.length <= 3 && w.every((x, i) => /^[A-ZÁÉÍÓÚÜÑ]/.test(x) || (i > 0 && small.test(x)));
 }
 function splitNotes(t){
-  const notes = []; const spoken = t.replace(/\(([^)]*)\)/g, (m, n) => { notes.push(n.trim()); return " "; }).replace(/\s+/g, " ").trim();
+  const notes = []; const spoken = String(t).replace(/\(([^)]*)\)/g, (m, n) => { notes.push(n.trim()); return " "; }).replace(/\s+/g, " ").trim();
   return { text: spoken, notes };
 }
 function parse(raw){
-  const out = []; let scene = ""; let pending = null; let lastWasLineOf = null;
-  const push = (char, note, txt) => {
-    const key = char.toUpperCase().replace(/\s+/g, " ").trim();
-    const s = splitNotes(txt || "");
+  const out = []; const meta = { title: "", subtitle: "", roster: {}, preamble: [] };
+  const rawLines = String(raw).replace(/\r/g, "").split("\n").map(l => l.trim().replace(/^[-•·*–]\s+/, ""));
+  const hasScenes = rawLines.some(l => reScene.test(l) && l.length < 90);
+  const upperSpeakers = rawLines.filter(l => { const m = l.match(reSpeaker); return m && m[1] === m[1].toUpperCase() && /[A-Z]/.test(m[1]) && words(m[1]) <= 4; }).length;
+  const strict = upperSpeakers >= 3;
+  let inPre = hasScenes, scene = "", pending = null, lastOf = null;
+  const push = (char, actor, qual, note, txt) => {
+    const key = keyOf(char); const s = splitNotes(txt || "");
     if (note) s.notes.unshift(note.trim());
-    out.push({ type: "line", char: key, text: s.text, notes: s.notes, scene });
-    lastWasLineOf = key;
+    if (qual){ let q = qual.trim().toLowerCase(); q = q.replace(/^como\s+([^\s,]+)/, (m, a) => "como " + title(a)); s.notes.unshift(q); }
+    if (actor && !meta.roster[key]) meta.roster[key] = { actor, desc: "" };
+    out.push({ type: "line", char: key, text: s.text, notes: s.notes, scene }); lastOf = key;
   };
-  for (let l of raw.replace(/\r/g, "").split("\n")){
-    l = l.trim();
-    if (!l){ pending = null; lastWasLineOf = null; continue; }
-    if (reScene.test(l) && l.length < 90){ scene = l; out.push({ type: "scene", text: l }); pending = null; lastWasLineOf = null; continue; }
-    if (/^[\(\[].*[\)\]]$/.test(l)){ out.push({ type: "dir", text: l.slice(1, -1).trim(), scene }); continue; }
-    let m = l.match(reColon);
-    if (m && isName(m[1])){ if (m[3] || m[2]) push(m[1], m[2], m[3]); pending = m[1]; continue; }
-    m = l.match(reDot);
-    if (m && words(m[1]) <= 4){ push(m[1], m[2], m[3]); pending = null; continue; }
-    m = l.match(reAlone);
-    if (m && words(m[1]) <= 4 && l === l.toUpperCase()){ pending = m[1]; if (m[2]) { out.push({ type:"dir", text:m[2], scene }); } lastWasLineOf = null; continue; }
-    const last = out[out.length - 1];
-    if (pending){
-      const key = pending.toUpperCase().replace(/\s+/g, " ").trim();
-      if (last && last.type === "line" && last.char === key && lastWasLineOf === key){ const s = splitNotes(l); last.text = (last.text + " " + s.text).trim(); last.notes.push(...s.notes); }
-      else push(pending, null, l);
+  for (const l of rawLines){
+    if (!l){ pending = null; lastOf = null; continue; }
+    if (reScene.test(l) && l.length < 90){ inPre = false; scene = l; out.push({ type: "scene", text: l }); pending = null; lastOf = null; continue; }
+    if (inPre){
+      const m = l.match(reSpeaker);
+      if (m && isName(m[1], true) && m[2] !== undefined){ meta.roster[keyOf(m[1])] = { actor: (m[2] || "").trim(), desc: (m[4] || "").replace(/\.$/, "").trim() }; continue; }
+      if (/^reparto$/i.test(l)) continue;
+      if (!meta.title) meta.title = l;
+      else if (!meta.subtitle && l.length < 120 && !/:/.test(l)) meta.subtitle = l;
+      else meta.preamble.push(l);
       continue;
     }
-    if (last && last.type === "line" && lastWasLineOf){ const s = splitNotes(l); last.text = (last.text + " " + s.text).trim(); last.notes.push(...s.notes); continue; }
+    if (/^[\(\[].*[\)\]]$/.test(l)){ out.push({ type: "dir", text: l.slice(1, -1).trim(), scene }); continue; }
+    let m = l.match(reSpeaker);
+    if (m && isName(m[1], strict)){
+      let actor = "", note = null; const par = (m[2] || "").trim();
+      if (par){ const r = meta.roster[keyOf(m[1])]; if ((r && r.actor === par) || personLike(par)) actor = par; else note = par; }
+      if (m[4] || note || m[3]) push(m[1], actor, m[3], note, m[4]); else if (actor && !meta.roster[keyOf(m[1])]) meta.roster[keyOf(m[1])] = { actor, desc: "" };
+      pending = m[1]; continue;
+    }
+    m = l.match(reDot);
+    if (m && words(m[1]) <= 4){ push(m[1], "", "", m[2], m[3]); pending = null; continue; }
+    m = l.match(reAlone);
+    if (m && words(m[1]) <= 4 && l === l.toUpperCase()){ pending = m[1]; if (m[2]) out.push({ type: "dir", text: m[2], scene }); lastOf = null; continue; }
+    const last = out[out.length - 1];
+    if (pending){
+      const key = keyOf(pending);
+      if (last && last.type === "line" && last.char === key && lastOf === key){ const s = splitNotes(l); last.text = (last.text + " " + s.text).trim(); last.notes.push(...s.notes); }
+      else push(pending, "", "", null, l);
+      continue;
+    }
+    if (last && last.type === "line" && lastOf){ const s = splitNotes(l); last.text = (last.text + " " + s.text).trim(); last.notes.push(...s.notes); continue; }
     out.push({ type: "dir", text: l, scene });
   }
   const seen = {};
   for (const it of out){ if (it.type !== "line") continue; const b = hash(it.char + "|" + it.text); seen[b] = (seen[b] || 0) + 1; it.key = b + "-" + seen[b]; }
-  return out.filter(it => it.type !== "line" || it.text || it.notes.length);
+  const lines = out.filter(it => it.type !== "line" || it.text || it.notes.length);
+  if (meta.title) meta.title = sentence(meta.title);
+  return { lines, meta };
 }
 function castOf(lines){
   const c = {}; for (const it of lines) if (it.type === "line") c[it.char] = (c[it.char] || 0) + 1;
-  return Object.entries(c).sort((a,b) => b[1] - a[1]);
+  return Object.entries(c).sort((a,b) => (isGroup(a[0]) - isGroup(b[0])) || b[1] - a[1]);
 }
-
-/* ============ Guion de ejemplo (original) ============ */
-const SAMPLE = `ESCENA 1. Salón de casa de la abuela. Tarde de lluvia.
-(Entra LUCÍA con una caja polvorienta entre los brazos.)
-LUCÍA: Abuela, mira lo que he encontrado detrás del baúl.
-ABUELA ROSARIO: (sin levantar la vista del punto) Si es otra araña, déjala donde estaba.
-LUCÍA: Es una llave. Grande, de hierro, con una cinta roja.
-ABUELA ROSARIO: (deja las agujas) Esa cinta la até yo. En mil novecientos setenta y dos.
-DON ANSELMO: (desde la puerta) ¿Mil novecientos setenta y dos? Rosario, ese año no abriste ni la ventana.
-ABUELA ROSARIO: Anselmo, entra y calla, que la lluvia te ha dejado el sombrero como una maceta.
-LUCÍA: ¿Y qué abre?
-ABUELA ROSARIO: El desván. Y en el desván, lo que tu abuelo no quiso que viera nadie.
-DON ANSELMO: Ni yo. Y eso que le presté la escalera.
-LUCÍA: Pues ahora lo vamos a ver los tres.
-(Pausa. Un trueno.)
-ABUELA ROSARIO: Está bien. Pero antes, un café. Las sorpresas, con el estómago lleno.
-DON ANSELMO: Por fin una idea sensata en esta casa.
-
-ESCENA 2. El desván. Polvo, baúles y una ventana pequeña.
-LUCÍA: Huele a madera vieja y a algo dulce.
-ABUELA ROSARIO: A membrillo. Tu abuelo escondía aquí las cartas. Y el membrillo.
-DON ANSELMO: (abre un baúl) Aquí hay un sobre con tu nombre, Rosario.
-ABUELA ROSARIO: (muy bajo) Léelo tú, Lucía. A mí me tiembla la voz.
-LUCÍA: "Si alguien encuentra esta llave, que suba a Rosario el café a la cama. Un día, por lo menos."
-DON ANSELMO: Cuarenta años guardando eso. Qué hombre más romántico.
-ABUELA ROSARIO: Romántico y tacaño. Ni una joya, ni un duro. Un café.
-LUCÍA: Pues mañana te lo subo yo, abuela. Con membrillo.`;
 
 /* ============ Estado ============ */
 const LS = "apuntador.v1";
 function freshScript(name, raw, me){
-  const lines = parse(raw);
-  return { id: uid(), title: name, raw, lines, me: me || "", cast: {}, progress: {}, rec: {}, sessions: [], updated: Date.now() };
+  const p = parse(raw);
+  return { id: uid(), title: name || p.meta.title || "Obra sin título", raw, lines: p.lines, meta: p.meta, me: me || "", cast: {}, progress: {}, rec: {}, notes: {}, scores: {}, sessions: [], status: "ensayo", premiere: "", version: "Borrador", loop: null, created: Date.now(), updated: Date.now() };
 }
-function defaults(){
-  const sc = freshScript("La llave del desván (ejemplo)", SAMPLE, "LUCÍA");
-  const mine = sc.lines.filter(l => l.type === "line" && l.char === "LUCÍA");
-  if (mine[0]) sc.progress[mine[0].key] = 2; if (mine[1]) sc.progress[mine[1].key] = 1;
-  return {
-    profile: { name: PERSONA_DEFAULT, group: GRUPO_DEFAULT },
-    scripts: [sc], current: sc.id,
-    settings: { rate: 1, announce: true, announceScenes: true, readDirections: false, pauseMode: "auto", pauseFactor: 1.2, level: "initials", context: "scene", chime: true, memFilter: "all" },
-    days: []
-  };
-}
+const DEF_SETTINGS = { rate: 1, announce: true, announceScenes: true, readDirections: false, pauseMode: "auto", pauseFactor: 1.2, level: "initials", context: "scene", chime: true, memFilter: "all", showNotes: true, tapMode: "play", recordSelf: false, narrator: "" };
 let S;
 try { S = JSON.parse(localStorage.getItem(LS) || "null"); } catch(e){ S = null; }
-if (!S || !S.scripts || !S.scripts.length) S = defaults();
-S.settings = Object.assign(defaults().settings, S.settings || {});
-S.profile = Object.assign({ name: PERSONA_DEFAULT, group: GRUPO_DEFAULT }, S.profile || {});
-if (!S.profile.name && PERSONA_DEFAULT) S.profile.name = PERSONA_DEFAULT;
-if (!S.profile.group && GRUPO_DEFAULT) S.profile.group = GRUPO_DEFAULT;
+if (!S) S = { scripts: [], current: null, days: [] };
+S.scripts = (S.scripts || []).filter(s => s.title !== "La llave del desván (ejemplo)");   // fuera el ejemplo de prueba
+S.settings = Object.assign({}, DEF_SETTINGS, S.settings || {});
+S.profile = Object.assign({ name: PERSONA_DEFAULT, group: GRUPO_DEFAULT, dir: false }, S.profile || {});
 S.days = S.days || [];
-(function hashName(){ const h = decodeURIComponent((location.hash || "").slice(1)); if (h && /^[\p{L} .'-]{2,30}$/u.test(h)) S.profile.name = h.replace(/[-_]/g, " "); })();
-function save(){ try { localStorage.setItem(LS, JSON.stringify(S)); } catch(e){} }
-const cur = () => S.scripts.find(s => s.id === S.current) || S.scripts[0];
-const myLines = sc => sc.lines.filter(l => l.type === "line" && l.char === sc.me);
+for (const s of S.scripts){
+  if (!s.meta) s.meta = parse(s.raw).meta;
+  s.notes = s.notes || {}; s.scores = s.scores || {}; s.rec = s.rec || {}; s.progress = s.progress || {}; s.cast = s.cast || {}; s.sessions = s.sessions || [];
+  s.status = s.status || "ensayo"; s.premiere = s.premiere || ""; s.version = s.version || "Borrador"; s.loop = s.loop || null;
+}
+if (!S.scripts.some(s => s.id === S.current)) S.current = S.scripts[0] ? S.scripts[0].id : null;
+(function hashName(){ const h = decodeURIComponent((location.hash || "").slice(1)); if (h && /^[\p{L} .'_-]{2,30}$/u.test(h)) S.profile.name = h.replace(/[-_]/g, " "); })();
+function save(){ try { localStorage.setItem(LS, JSON.stringify(S)); } catch(e){ toast("No queda espacio para guardar en este navegador."); } }
+const cur = () => S.scripts.find(s => s.id === S.current) || null;
+const isMine = (sc, it) => it.type === "line" && !!sc.me && (it.char === sc.me || isGroup(it.char));
+const myLines = sc => sc.lines.filter(l => isMine(sc, l));
+const actorOf = (sc, ch) => (sc.meta && sc.meta.roster && sc.meta.roster[ch]) || null;
 
 /* ============ Audio guardado (IndexedDB con respaldo en memoria) ============ */
 const memAudio = new Map(); let dbp = null;
@@ -312,7 +337,7 @@ let VOICES = [];
 const HAS_TTS = "speechSynthesis" in window;
 function loadVoices(){ if (!HAS_TTS) return; const all = speechSynthesis.getVoices(); const es = all.filter(v => /^es/i.test(v.lang)); VOICES = es.length ? es : all; }
 if (HAS_TTS){ loadVoices(); speechSynthesis.onvoiceschanged = () => { loadVoices(); if (view === "ajustes") render(); }; }
-const PITCHES = [1, 0.78, 1.28, 0.92, 1.15, 0.68, 1.4];
+const PITCHES = [1, 0.78, 1.28, 0.92, 1.15, 0.7, 1.4, 0.85, 1.22, 1.05];
 function charIdx(sc, ch){ return Math.max(0, castOf(sc.lines).findIndex(c => c[0] === ch)); }
 function voiceCfg(sc, ch){
   const cfg = sc.cast[ch] || {}; const i = charIdx(sc, ch);
@@ -346,8 +371,9 @@ function playBlob(blob){
 async function playLine(sc, it){
   const blob = sc.rec[it.key] ? await audioGet(sc.id + ":" + it.key) : null;
   if (blob) return playBlob(blob);
-  return say(it.text, voiceCfg(sc, it.char));
+  return say(it.text, voiceCfg(sc, isGroup(it.char) ? (castOf(sc.lines)[0] || [it.char])[0] : it.char));
 }
+function hush(){ if (HAS_TTS) speechSynthesis.cancel(); if (currentAudio) currentAudio.pause(); }
 let actx = null;
 function chime(){
   try {
@@ -358,23 +384,64 @@ function chime(){
   } catch(e){}
 }
 
+/* ============ Micrófono y reconocimiento de voz ============ */
+const MIC_OK = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia && window.MediaRecorder) && (() => { try { const p = document.permissionsPolicy || document.featurePolicy; return p && p.allowsFeature ? p.allowsFeature("microphone") : true; } catch(e){ return true; } })();
+let micBlocked = !MIC_OK;
+const SRClass = window.SpeechRecognition || window.webkitSpeechRecognition || null;
+const SR_OK = !!SRClass && MIC_OK;
+let srBroken = false;
+function lev(a, b){ if (Math.abs(a.length - b.length) > 1) return 2; const d = Array.from({ length: a.length + 1 }, (_, i) => [i]); for (let j = 1; j <= b.length; j++) d[0][j] = j; for (let i = 1; i <= a.length; i++) for (let j = 1; j <= b.length; j++) d[i][j] = Math.min(d[i-1][j] + 1, d[i][j-1] + 1, d[i-1][j-1] + (a[i-1] === b[j-1] ? 0 : 1)); return d[a.length][b.length]; }
+const eqW = (a, b) => a === b || (a.length >= 5 && lev(a, b) <= 1);
+function compare(text, heard){
+  const w = String(text).split(/\s+/).filter(Boolean); const tn = w.map(x => norm(x).replace(/\s+/g, ""));
+  const h = norm(heard).split(/\s+/).filter(Boolean); const n = tn.length, m = h.length;
+  const dp = Array.from({ length: n + 1 }, () => new Uint16Array(m + 1));
+  for (let i = n - 1; i >= 0; i--) for (let j = m - 1; j >= 0; j--) dp[i][j] = tn[i] && eqW(tn[i], h[j]) ? dp[i+1][j+1] + 1 : Math.max(dp[i+1][j], dp[i][j+1]);
+  const hit = new Array(n).fill(false); let i = 0, j = 0;
+  while (i < n && j < m){ if (tn[i] && eqW(tn[i], h[j])){ hit[i] = true; i++; j++; } else if (dp[i+1][j] >= dp[i][j+1]) i++; else j++; }
+  let real = 0, ok = 0; tn.forEach((t, k) => { if (!t){ hit[k] = true; return; } real++; if (hit[k]) ok++; });
+  return { words: w, hit, score: real ? ok / real : 1 };
+}
+function scoreChip(p){ return `<span class="chip ${p >= 90 ? "ok" : p >= 65 ? "mid" : "rec"}">${p} %</span>`; }
+function diffHTML(it, res){ return notesHTML(it) + res.words.map((x, k) => res.hit[k] ? esc(x) : `<mark class="miss">${esc(x)}</mark>`).join(" ") + " " + scoreChip(Math.round(res.score * 100)); }
+function listenFor(text, my){
+  return new Promise(res => {
+    let rec; try { rec = new SRClass(); } catch(e){ res(null); return; }
+    rec.lang = "es-ES"; rec.continuous = false; rec.interimResults = true; rec.maxAlternatives = 1;
+    let finalT = "", interimT = "", done = false, silenceT = null, failed = false, gotAny = false;
+    const maxT = setTimeout(() => end(), estimate(text) * 2 + 6000);
+    const end = () => { if (done) return; done = true; clearTimeout(maxT); clearTimeout(silenceT); RUN.sr = null; try { rec.abort(); } catch(e){} if (advanceResolver === end) advanceResolver = null; res(failed && !gotAny ? null : (finalT + " " + interimT).trim()); };
+    rec.onresult = e => {
+      gotAny = true; interimT = "";
+      for (let i = e.resultIndex; i < e.results.length; i++){ const r = e.results[i]; if (r.isFinal) finalT += " " + r[0].transcript; else interimT += " " + r[0].transcript; }
+      const heard = (finalT + " " + interimT).trim(); const lv = $("#live"); if (lv) lv.textContent = "Te escucho: " + heard;
+      clearTimeout(silenceT); const cov = compare(text, heard).score; silenceT = setTimeout(end, cov >= 0.85 ? 700 : 1700);
+    };
+    rec.onerror = ev => { if (ev.error === "not-allowed" || ev.error === "service-not-allowed" || ev.error === "audio-capture" || ev.error === "network"){ failed = true; end(); } };
+    rec.onend = () => { if (!done && my === RUN.token){ try { rec.start(); } catch(e){ end(); } } else end(); };
+    advanceResolver = end; RUN.sr = rec;
+    try { rec.start(); } catch(e){ failed = true; end(); }
+  });
+}
+
 /* ============ Motor de lectura / ensayo ============ */
-const RUN = { token: 0, mode: null, idx: -1, waiting: false, revealed: new Set(), active: false };
+const RUN = { token: 0, mode: null, idx: -1, waiting: false, revealed: new Set(), results: new Map(), active: false, round: 1, sr: null, stream: null, pick: null };
+let lastSession = null;
 let advanceResolver = null, barTimer = null;
 function waitAdvance(ms){
   return new Promise(res => {
     let t;
-    const done = () => { clearTimeout(t); advanceResolver = null; stopBar(); res(); };
+    const done = () => { clearTimeout(t); if (advanceResolver === done) advanceResolver = null; stopBar(); res(); };
     advanceResolver = done;
     if (ms){ t = setTimeout(done, ms); startBar(ms); }
   });
 }
-function advance(){ if (advanceResolver) advanceResolver(); else if (HAS_TTS && speechSynthesis.speaking) speechSynthesis.cancel(); else if (currentAudio) currentAudio.pause(); }
-function startBar(ms){ const b = $("#tbar"); if (!b) return; const t0 = Date.now(); stopBar(); barTimer = setInterval(() => { const el = $("#tbar"); if (el) el.style.width = Math.min(100, (Date.now() - t0) / ms * 100) + "%"; }, 120); }
+function advance(){ if (advanceResolver) advanceResolver(); else hush(); }
+function startBar(ms){ const t0 = Date.now(); stopBar(); barTimer = setInterval(() => { const el = $("#tbar"); if (el) el.style.width = Math.min(100, (Date.now() - t0) / ms * 100) + "%"; }, 120); }
 function stopBar(){ clearInterval(barTimer); const el = $("#tbar"); if (el) el.style.width = "0"; }
 function stopAll(){
   RUN.token++; RUN.active = false; RUN.waiting = false; RUN.idx = -1;
-  if (HAS_TTS) speechSynthesis.cancel(); if (currentAudio) currentAudio.pause();
+  hush(); if (RUN.sr){ try { RUN.sr.abort(); } catch(e){} }
   if (advanceResolver) advanceResolver();
   document.querySelectorAll(".it.now").forEach(e => e.classList.remove("now", "wait"));
   updateRunUI();
@@ -386,54 +453,84 @@ function highlight(i){
   const el = document.querySelector('.it[data-i="' + i + '"]');
   if (el){ el.classList.add("now"); if (RUN.waiting) el.classList.add("wait"); el.scrollIntoView({ block: "center", behavior: REDUCED ? "auto" : "smooth" }); }
 }
-async function runFrom(start, mode){
-  if (!HAS_TTS && mode) toast("Este navegador no puede leer en voz alta. Usa audios grabados o prueba con Chrome o Safari.");
+function sceneBounds(sc, i){
+  const L = sc.lines; let a = 0; for (let j = Math.min(i, L.length - 1); j >= 0; j--) if (L[j].type === "scene"){ a = j; break; }
+  let b = L.length - 1; for (let j = a + 1; j < L.length; j++) if (L[j].type === "scene"){ b = j - 1; break; }
+  return [a, b];
+}
+function loopLabel(sc){ const l = sc.loop; if (!l) return ""; const L = sc.lines; if (L[l.a] && L[l.a].type === "scene" && sceneBounds(sc, l.a)[1] === l.b) return L[l.a].text.split(/[.:]/)[0]; const n = i => sc.lines.slice(0, i + 1).filter(x => x.type === "line").length; return "réplicas " + n(l.a) + "–" + n(l.b); }
+async function runFrom(start, mode, opt = {}){
+  const sc = cur(); if (!sc) return;
+  if (!HAS_TTS && mode !== "replay") toast("Este navegador no puede leer en voz alta. Usa voces grabadas o prueba con Chrome o Safari.");
   stopAll();
-  const my = ++RUN.token; const sc = cur(); const L = sc.lines;
-  RUN.mode = mode; RUN.active = true; RUN.revealed = new Set(); let said = 0;
-  if (mode === "rehearse" && !sc.me){ RUN.active = false; toast("Elige primero tu personaje."); go("ajustes"); return; }
+  const my = ++RUN.token; const L = sc.lines;
+  if (mode === "rehearse" && !sc.me){ toast("Elige primero tu personaje."); go("inicio"); return; }
+  RUN.mode = mode; RUN.active = true; RUN.revealed = new Set(); RUN.results = new Map(); RUN.round = 1; let said = 0, last = start;
+  const loop = mode !== "replay" && sc.loop && sc.loop.on ? sc.loop : null;
+  const a = loop ? loop.a : 0, b = opt.end != null ? opt.end : loop ? loop.b : L.length - 1;
+  if (loop && (start < a || start > b)) start = a;
+  let stream = null; const clips = mode === "rehearse" && S.settings.recordSelf && !micBlocked ? new Map() : null;
+  if (clips){ try { stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } }); } catch(e){ toast("No he podido activar el micrófono para grabarte."); } }
+  if (my !== RUN.token){ if (stream) stream.getTracks().forEach(t => t.stop()); return; }
   render();
-  for (let i = start; i < L.length; i++){
-    if (my !== RUN.token) return;
-    const it = L[i]; RUN.idx = i; RUN.waiting = false;
-    if (it.type === "scene"){ highlight(i); updateRunUI(); if (S.settings.announceScenes) await say(it.text, narrator()); else await sleep(400); continue; }
-    if (it.type === "dir"){ if (S.settings.readDirections){ highlight(i); updateRunUI(); await say(it.text, narrator()); } continue; }
-    const mine = mode === "rehearse" && it.char === sc.me;
-    if (mode === "rehearse" && S.settings.context === "cue" && !mine){ const n = nextLineIdx(L, i); if (n < 0 || L[n].char !== sc.me) continue; }
+  let i = start;
+  while (my === RUN.token){
+    if (i > b){ if (loop){ RUN.round++; i = a; updateRunUI(); await sleep(700); continue; } break; }
+    const it = L[i]; RUN.idx = i; RUN.waiting = false; last = i;
+    if (it.type === "scene"){ highlight(i); updateRunUI(); if (S.settings.announceScenes && mode !== "replay") await say(it.text, narrator()); else await sleep(350); i++; continue; }
+    if (it.type === "dir"){ if (S.settings.readDirections && mode !== "replay"){ highlight(i); updateRunUI(); await say(it.text, narrator()); } i++; continue; }
+    const mine = (mode === "rehearse" || mode === "replay") && isMine(sc, it);
+    if (mode === "rehearse" && S.settings.context === "cue" && !mine){ const n = nextLineIdx(L, i); if (n < 0 || !isMine(sc, L[n])){ i++; continue; } }
     if (!mine){
       highlight(i); updateRunUI();
-      if (S.settings.announce && (mode === "listen" || mode === "rehearse")) { await say(title(it.char), narrator()); if (my !== RUN.token) return; }
-      await playLine(sc, it); if (my !== RUN.token) return;
-      await sleep(250); continue;
+      if (S.settings.announce && mode !== "replay"){ await say(title(it.char), narrator()); if (my !== RUN.token) break; }
+      await playLine(sc, it); if (my !== RUN.token) break;
+      await sleep(250); i++; continue;
     }
+    if (mode === "replay"){ highlight(i); updateRunUI(); const c = opt.clips && opt.clips.get(i); if (c) await playBlob(c); else await sleep(500); i++; continue; }
     RUN.waiting = true; highlight(i); updateRunUI();
-    if (S.settings.chime) chime();
-    await waitAdvance(S.settings.pauseMode === "auto" ? estimate(it.text) : 0);
-    if (my !== RUN.token) return;
+    if (S.settings.chime){ chime(); await sleep(260); }
+    let mr = null; const chunks = [];
+    if (stream){ try { mr = new MediaRecorder(stream); mr.ondataavailable = e => { if (e.data && e.data.size) chunks.push(e.data); }; mr.start(); } catch(e){ mr = null; } }
+    let heard;
+    if (S.settings.pauseMode === "voice" && SR_OK && !srBroken){
+      heard = await listenFor(it.text, my);
+      if (heard === null && my === RUN.token){ srBroken = true; toast("No he podido usar el reconocimiento de voz. Sigo con espera automática."); await waitAdvance(estimate(it.text)); }
+    } else await waitAdvance(S.settings.pauseMode === "auto" ? estimate(it.text) : 0);
+    if (mr){ await new Promise(r => { mr.onstop = r; try { mr.stop(); } catch(e){ r(); } }); if (chunks.length) clips.set(i, new Blob(chunks, { type: mr.mimeType || "audio/webm" })); }
+    if (my !== RUN.token) break;
     RUN.waiting = false; RUN.revealed.add(i); said++;
-    const el = document.querySelector('.it[data-i="' + i + '"] .tx'); if (el) el.innerHTML = fullText(it);
-    if (S.settings.level !== "full") await sleep(1100);
+    let res = null;
+    if (typeof heard === "string" && heard){ res = compare(it.text, heard); RUN.results.set(i, res); sc.scores[it.key] = Math.round(res.score * 100); save(); }
+    const el = document.querySelector('.it[data-i="' + i + '"] .tx'); if (el) el.innerHTML = res ? diffHTML(it, res) : fullText(it);
+    const lv = $("#live"); if (lv) lv.textContent = "";
+    if (S.settings.level !== "full" || res) await sleep(res ? 1500 : 1100);
+    i++;
   }
+  if (stream) stream.getTracks().forEach(t => t.stop());
+  if (clips && clips.size) lastSession = { sid: sc.id, a: start, b: last, clips };
   if (my === RUN.token){ RUN.active = false; RUN.idx = -1; document.querySelectorAll(".it.now").forEach(e => e.classList.remove("now", "wait")); updateRunUI(); finish(mode, said); }
+  else if (clips && clips.size) updateRunUI();
 }
 function finish(mode, said){
   const sc = cur();
-  if (mode === "rehearse"){
-    if (!S.days.includes(today())) S.days.push(today());
-    sc.sessions.push({ d: Date.now(), n: said }); save();
-    const name = S.profile.name ? ", " + esc(S.profile.name) : "";
-    modal(`<h2>¡Bravo${name}!</h2><p class="muted">Has dado vida a ${said} ${said === 1 ? "réplica" : "réplicas"} de ${esc(title(sc.me))}. Llevas ${streak()} ${streak() === 1 ? "día" : "días"} seguidos ensayando.</p>
-      <div class="row" style="justify-content:center"><button class="btn primary" data-a="again">Otra vez</button><button class="btn" data-a="closeModal">Cerrar</button></div>`);
-  }
+  if (mode !== "rehearse") return;
+  if (!S.days.includes(today())) S.days.push(today());
+  const scores = [...RUN.results.values()].map(r => r.score); const avg = scores.length ? Math.round(scores.reduce((x, y) => x + y, 0) / scores.length * 100) : null;
+  sc.sessions.push({ d: Date.now(), n: said, avg }); save();
+  const name = S.profile.name ? ", " + esc(S.profile.name) : "";
+  const canReplay = lastSession && lastSession.sid === sc.id && lastSession.clips.size;
+  modal(`<h2>¡Bravo${name}!</h2><p class="muted">Has dado vida a ${said} ${said === 1 ? "réplica" : "réplicas"} de ${esc(title(sc.me))}${avg != null ? `, con un ${avg} % de exactitud` : ""}. Llevas ${streak()} ${streak() === 1 ? "día" : "días"} seguidos ensayando.</p>
+    <div class="row" style="justify-content:center">${canReplay ? '<button class="btn primary" data-a="replay">Escuchar mi ensayo</button>' : ""}<button class="btn ${canReplay ? "" : "primary"}" data-a="again">Otra vez</button><button class="btn ghost" data-a="closeModal">Cerrar</button></div>`, true);
 }
 function streak(){
   const set = new Set(S.days); let n = 0; const d = new Date();
-  if (!set.has(d.toISOString().slice(0,10))) d.setDate(d.getDate() - 1);
-  while (set.has(d.toISOString().slice(0,10))){ n++; d.setDate(d.getDate() - 1); }
+  if (!set.has(dayStr(d))) d.setDate(d.getDate() - 1);
+  while (set.has(dayStr(d))){ n++; d.setDate(d.getDate() - 1); }
   return n;
 }
 
-/* ============ Máscaras de memorización ============ */
+/* ============ Máscaras de memorización y notas ============ */
 const LETTER = /[A-Za-zÁÉÍÓÚÜÑáéíóúüñÀÈÌÒÙàèìòùÇç]/;
 function maskText(text, level){
   if (level === "full") return esc(text);
@@ -448,6 +545,21 @@ function maskText(text, level){
 }
 function notesHTML(it){ return it.notes && it.notes.length ? '<span class="note">(' + it.notes.map(esc).join(") (") + ")</span> " : ""; }
 function fullText(it){ return notesHTML(it) + esc(it.text); }
+const notesFor = (sc, k) => (sc.notes && sc.notes[k]) || [];
+function annItem(n){ const me = S.profile.name && n.by === S.profile.name; return `<div class="ann ${n.dir ? "dir" : me ? "mineN" : ""}"><b>${n.dir ? "Dirección" + (n.by ? " · " + esc(n.by) : "") : esc(n.by || "Sin firma")}</b> ${esc(n.text)}</div>`; }
+function annHTML(sc, it){ const ns = notesFor(sc, it.key); if (!ns.length || !S.settings.showNotes) return ""; return '<div class="anns">' + ns.map(annItem).join("") + "</div>"; }
+function noteModal(i){
+  const sc = cur(); const it = sc.lines[i]; const ns = notesFor(sc, it.key);
+  modal(`<h2>Notas</h2>
+    <div class="small"><b style="color:var(--gold)">${esc(title(it.char))}</b> ${fullText(it)}</div>
+    <div class="stack" style="gap:6px">${ns.map(n => `<div class="row" style="gap:6px;align-items:flex-start;flex-wrap:nowrap"><div style="flex:1">${annItem(n)}</div>${n.by === S.profile.name ? `<button class="btn sm ghost" data-a="noteDel" data-i="${i}" data-id="${n.id}">Borrar</button>` : ""}</div>`).join("") || '<span class="muted small">Todavía no hay notas en esta réplica.</span>'}</div>
+    ${!S.profile.name ? `<label class="f" for="noteBy">Tu nombre, para firmar la nota<input type="text" id="noteBy" autocomplete="given-name"></label>` : ""}
+    <label class="f" for="noteTxt">Nueva nota<textarea id="noteTxt" class="prose" placeholder="Ej.: pausa larga antes de responder; mirar a Sito; más rabia"></textarea></label>
+    <div class="small muted">${S.profile.name ? "Firmará " + esc(S.profile.name) + (S.profile.dir ? " como dirección" : "") : ""}</div>
+    <div class="row"><button class="btn primary" data-a="noteSave" data-i="${i}">Guardar nota</button><button class="btn ghost" data-a="closeModal">Cerrar</button></div>`);
+  setTimeout(() => { const t = $("#noteTxt"); if (t) t.focus(); }, 50);
+}
+function countNotes(sc){ return Object.values(sc.notes || {}).reduce((a, n) => a + n.length, 0); }
 
 /* ============ UI base ============ */
 let view = "inicio";
@@ -457,18 +569,20 @@ const ICONS = {
   ensayo: '<path d="M12 3a3 3 0 0 1 3 3v5a3 3 0 0 1-6 0V6a3 3 0 0 1 3-3z"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/>',
   memoria: '<rect x="3" y="6" width="14" height="12" rx="2"/><path d="M7 3h12a2 2 0 0 1 2 2v11"/>',
   grabar: '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3.5" fill="currentColor"/>',
-  ajustes: '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>'
+  ajustes: '<circle cx="9" cy="8" r="3.2"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0"/><circle cx="17" cy="9" r="2.4"/><path d="M15.5 14.2A4.5 4.5 0 0 1 21 18.5"/>'
 };
 const LABELS = { inicio: "Inicio", guion: "Libreto", ensayo: "Ensayar", memoria: "Memorizar", grabar: "Grabar", ajustes: "Reparto" };
 function renderTabs(){
-  $("#tabs").innerHTML = Object.keys(LABELS).map(k => `<button class="tab" data-go="${k}" ${view === k ? 'aria-current="page"' : ""}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${ICONS[k]}</svg>${LABELS[k]}</button>`).join("");
   const sc = cur();
-  $("#topPlay").innerHTML = S.scripts.length > 1
-    ? `<select id="pickPlay" aria-label="Obra">${S.scripts.map(s => `<option value="${s.id}" ${s.id === sc.id ? "selected" : ""}>${esc(s.title)}</option>`).join("")}</select>`
+  $("#tabs").innerHTML = Object.keys(LABELS).map(k => `<button class="tab" data-go="${k}" ${view === k ? 'aria-current="page"' : ""} ${!sc && k !== "inicio" ? "disabled" : ""}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[k]}</svg>${LABELS[k]}</button>`).join("");
+  const act = S.scripts.filter(s => s.status !== "estrenada" || s.id === S.current);
+  $("#topPlay").innerHTML = !sc ? "" : act.length > 1
+    ? `<select id="pickPlay" aria-label="Obra">${act.map(s => `<option value="${s.id}" ${s.id === sc.id ? "selected" : ""}>${esc(s.title)}</option>`).join("")}</select>`
     : `<div class="small muted" style="text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(sc.title)}</div>`;
 }
-function go(v){ if (RUN.active && v !== view) stopAll(); if (recState && v !== view) recState.mr.stop(); view = v; render(); window.scrollTo(0, 0); }
+function go(v){ if (RUN.active && v !== view) stopAll(); if (recState && v !== view) recState.mr.stop(); RUN.pick = null; view = v; render(); window.scrollTo(0, 0); }
 function render(){
+  if (!cur() && !["inicio", "nuevo"].includes(view)) view = "inicio";
   renderTabs();
   const fn = { inicio: vInicio, guion: vGuion, ensayo: vEnsayo, memoria: vMemoria, grabar: vGrabar, ajustes: vAjustes, nuevo: vNuevo }[view] || vInicio;
   $("#view").innerHTML = fn();
@@ -476,8 +590,8 @@ function render(){
   updateRunUI();
 }
 let toastT;
-function toast(msg){ clearTimeout(toastT); let t = $(".toast"); if (!t){ t = document.createElement("div"); t.className = "toast"; t.setAttribute("role", "status"); document.body.appendChild(t); } t.textContent = msg; toastT = setTimeout(() => t.remove(), 4200); }
-function modal(html){ $("#overlay").innerHTML = `<div class="modal-bg" data-a="closeModalBg"><div class="modal" role="dialog" aria-modal="true">${html}</div></div>`; }
+function toast(msg){ clearTimeout(toastT); let t = $(".toast"); if (!t){ t = document.createElement("div"); t.className = "toast"; t.setAttribute("role", "status"); document.body.appendChild(t); } t.textContent = msg; toastT = setTimeout(() => t.remove(), 4500); }
+function modal(html, center){ $("#overlay").innerHTML = `<div class="modal-bg" data-a="closeModalBg"><div class="modal ${center ? "center" : ""}" role="dialog" aria-modal="true">${html}</div></div>`; }
 function closeModal(){ $("#overlay").innerHTML = ""; }
 
 /* ============ Vistas ============ */
@@ -487,38 +601,86 @@ function ring(pct){
 }
 function stats(sc){
   const mine = myLines(sc); const learned = mine.filter(l => sc.progress[l.key] === 2).length;
-  return { mine: mine.length, learned, pct: mine.length ? learned / mine.length : 0, recs: Object.keys(sc.rec).length, words: mine.reduce((a, l) => a + words(l.text), 0) };
+  const sc2 = mine.map(l => sc.scores[l.key]).filter(x => x != null);
+  return { mine: mine.length, learned, pct: mine.length ? learned / mine.length : 0, recs: Object.keys(sc.rec).length, acc: sc2.length ? Math.round(sc2.reduce((a, b) => a + b, 0) / sc2.length) : null };
+}
+function daysTo(d){ if (!d) return null; return Math.round((new Date(d + "T12:00:00") - new Date(today() + "T12:00:00")) / 86400000); }
+function countdownHTML(sc){
+  const n = daysTo(sc.premiere); if (n == null || sc.status === "estrenada") return "";
+  if (n > 1) return `<div class="countdown"><b>${n}</b> días para el estreno</div>`;
+  if (n === 1) return `<div class="countdown">El estreno es <b>mañana</b></div>`;
+  if (n === 0) return `<div class="countdown"><b>¡Hoy es el estreno!</b> Mucha mierda</div>`;
+  return `<div class="countdown small">El estreno fue el ${esc(fmtDate(sc.premiere))}. Márcala como estrenada en Reparto.</div>`;
+}
+let installEvt = null;
+window.addEventListener("beforeinstallprompt", e => { e.preventDefault(); installEvt = e; if (view === "inicio") render(); });
+const STANDALONE = (window.matchMedia && matchMedia("(display-mode: standalone)").matches) || navigator.standalone;
+const IOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+function installHTML(){
+  if (STANDALONE || IN_FRAME) return "";
+  if (installEvt) return `<div class="card row" style="justify-content:space-between"><span class="small">Instálala en el móvil: icono propio y funciona sin internet.</span><button class="btn sm primary" data-a="install">Instalar</button></div>`;
+  if (IOS) return `<div class="card small muted">Para tenerla como app: en Safari pulsa el botón Compartir y luego «Añadir a pantalla de inicio».</div>`;
+  return "";
+}
+function vBienvenida(){
+  const name = S.profile.name;
+  return `<div class="stack">
+  <section class="hero"><h1>${name ? `Hola, <em>${esc(name)}</em>` : `Tu sala de <em>ensayo</em>`}</h1>
+  <p class="muted">Carga el guion de la obra para empezar. Si te lo han mandado por WhatsApp, descárgalo y elígelo aquí.</p></section>
+  <div class="card stack">
+    <button class="btn primary big" data-a="loadJson">Cargar guion recibido</button>
+    <button class="btn big" data-go="nuevo">Crear desde un PDF o Word</button>
+  </div>
+  ${installHTML()}
+  ${historyHTML(null)}
+</div>`;
+}
+function historyHTML(sc){
+  const act = S.scripts.filter(s => s.status !== "estrenada" && (!sc || s.id !== sc.id));
+  const done = S.scripts.filter(s => s.status === "estrenada" && (!sc || s.id !== sc.id)).sort((a, b) => (b.premiere || "").localeCompare(a.premiere || ""));
+  if (!act.length && !done.length && !sc) return "";
+  const row = s => { const t = stats(s); return `<div class="list-item"><div class="grow"><div>${esc(s.title)} ${s.version === "Definitivo" ? '<span class="chip ok">Definitivo</span>' : ""}</div><div class="small muted">${s.status === "estrenada" ? "Estrenada" + (s.premiere ? " el " + esc(fmtDate(s.premiere)) : "") + " · " : ""}${s.me ? "hiciste de " + esc(title(s.me)) + " · " : ""}${countNotes(s)} notas · ${Math.round(t.pct * 100)} % aprendido</div></div><button class="btn sm" data-a="useScript" data-id="${s.id}">Abrir</button></div>`; };
+  return `<section class="card">
+    <div class="row" style="justify-content:space-between;margin-bottom:6px"><h3>Obras</h3><div class="row"><button class="btn sm ghost" data-a="loadJson">Cargar guion</button><button class="btn sm primary" data-go="nuevo">Nuevo</button></div></div>
+    ${act.length ? `<div class="sub">En ensayo</div>${act.map(row).join("")}` : ""}
+    ${done.length ? `<div class="sub">Historial de obras</div>${done.map(row).join("")}` : sc ? `<p class="small muted" style="margin:6px 0 0">Cuando se estrene, márcala como estrenada en Reparto y quedará en el historial con sus notas.</p>` : ""}
+  </section>`;
 }
 function vInicio(){
-  const sc = cur(); const st = stats(sc); const name = S.profile.name;
-  const cast = castOf(sc.lines);
-  const msg = !sc.me ? "Elige tu personaje y empezamos."
+  const sc = cur(); if (!sc) return vBienvenida();
+  const st = stats(sc); const name = S.profile.name; const cast = castOf(sc.lines).filter(c => !isGroup(c[0]));
+  const msg = sc.status === "estrenada" ? "Obra estrenada. Aquí quedan su libreto, las voces y las notas."
+    : !sc.me ? "Elige tu personaje y empezamos."
     : st.pct >= 1 ? "Te sabes todo el papel. Ahora, a jugar con los matices."
     : st.pct >= .5 ? "Ya tienes más de la mitad. El resto sale ensayando."
     : st.learned > 0 ? "Buen comienzo. Unas vueltas más y se queda."
-    : "Primero escúchalo entero, luego ensaya tu parte.";
+    : "Primero escúchala entera, luego ensaya tu parte.";
+  const ra = sc.me && actorOf(sc, sc.me);
   return `<div class="stack">
   <section class="hero">
     <h1>${name ? `Hola, <em>${esc(name)}</em>` : `Tu sala de <em>ensayo</em>`}</h1>
     <p class="muted">${S.profile.group ? esc(S.profile.group) + ". " : ""}${msg}</p>
+    ${countdownHTML(sc)}
   </section>
-  ${!name ? `<div class="card row"><label class="f" style="flex:1;min-width:200px" for="nameIn">¿Cómo te llamas? Así te saludo
+  ${!name ? `<div class="card row"><label class="f" style="flex:1;min-width:200px" for="nameIn">¿Cómo te llamas? Así te saludo y firmo tus notas
     <input type="text" id="nameIn" placeholder="Tu nombre" autocomplete="given-name"></label><button class="btn" data-a="saveName" style="align-self:flex-end">Guardar</button></div>` : ""}
   <section class="card stack">
     <div class="play-card">
       ${ring(st.pct)}
       <div class="stack" style="gap:8px">
         <h2>${esc(sc.title)}</h2>
+        ${sc.meta && sc.meta.subtitle ? `<div class="small muted">${esc(sc.meta.subtitle)} · ${esc(sc.version)}</div>` : `<div class="small muted">${esc(sc.version)}</div>`}
         <label class="f" for="meSel">Tu personaje
-          <select id="meSel">${!sc.me ? '<option value="">Elige…</option>' : ""}${cast.map(([c, n]) => `<option value="${esc(c)}" ${c === sc.me ? "selected" : ""}>${esc(title(c))} · ${n} réplicas</option>`).join("")}</select>
+          <select id="meSel">${!sc.me ? '<option value="">Elige…</option>' : ""}${cast.map(([c, n]) => { const r = actorOf(sc, c); return `<option value="${esc(c)}" ${c === sc.me ? "selected" : ""}>${esc(title(c))}${r && r.actor ? " (" + esc(r.actor) + ")" : ""} · ${n} réplicas</option>`; }).join("")}</select>
         </label>
+        ${ra && ra.desc ? `<div class="small muted">${esc(title(sc.me))}: ${esc(ra.desc)}</div>` : ""}
       </div>
     </div>
     <div class="stats">
       <div class="stat"><b>${st.mine}</b><span>réplicas tuyas</span></div>
       <div class="stat"><b>${st.learned}</b><span>ya te las sabes</span></div>
-      <div class="stat"><b>${streak()}</b><span>días seguidos</span></div>
-      <div class="stat"><b>${st.recs}</b><span>audios grabados</span></div>
+      <div class="stat"><b>${st.acc != null ? st.acc + "%" : streak()}</b><span>${st.acc != null ? "exactitud media" : "días seguidos"}</span></div>
+      <div class="stat"><b>${countNotes(sc)}</b><span>notas en el libreto</span></div>
     </div>
     <div class="row">
       <button class="btn primary big" data-a="goRehearse">Ensayar mi papel</button>
@@ -526,26 +688,26 @@ function vInicio(){
       <button class="btn big ghost" data-a="listenAll">Escuchar la obra</button>
     </div>
   </section>
-  <section class="card">
-    <div class="row" style="justify-content:space-between;margin-bottom:6px"><h3>Tus guiones</h3><button class="btn sm primary" data-go="nuevo">Nuevo guion</button></div>
-    ${S.scripts.map(s => { const t = stats(s); return `<div class="list-item"><div class="grow"><div>${esc(s.title)}</div><div class="small muted">${s.me ? esc(title(s.me)) + " · " : ""}${castOf(s.lines).length} personajes · ${Math.round(t.pct * 100)} % aprendido</div></div>${s.id === sc.id ? '<span class="chip me">En uso</span>' : `<button class="btn sm" data-a="useScript" data-id="${s.id}">Abrir</button>`}</div>`; }).join("")}
-  </section>
-  <p class="small muted">Cómo funciona: escucha la obra entera con cada personaje en su voz. En «Ensayar» la app lee a los demás y se calla cuando te toca. Puedes ocultar tu texto poco a poco hasta decirlo de memoria. Si los compañeros graban sus réplicas en «Grabar», el ensayo suena con sus voces reales.</p>
+  ${installHTML()}
+  ${historyHTML(sc)}
+  <p class="small muted">En «Ensayar» la app lee a los demás y te deja tu hueco. Con «Me escucha» detecta cuándo terminas y te marca las palabras que se escapan. Las notas de dirección y de cada actor se ven en el libreto, y en «Grabar» cada compañero pone voz a sus réplicas.</p>
 </div>`;
 }
 function lineHTML(sc, it, i, mode){
-  if (it.type === "scene") return `<div class="it scene" data-i="${i}">${esc(it.text)}</div>`;
-  if (it.type === "dir") return `<div class="it dir" data-i="${i}">${esc(it.text)}</div>`;
-  const mine = it.char === sc.me;
+  const lp = sc.loop && sc.loop.on && i >= sc.loop.a && i <= sc.loop.b ? " inloop" : "";
+  if (it.type === "scene") return `<div class="it scene${lp}" data-i="${i}" data-a="lineTap">${esc(it.text)}</div>`;
+  if (it.type === "dir") return `<div class="it dir${lp}" data-i="${i}">${esc(it.text)}</div>`;
+  const mine = isMine(sc, it);
   const masked = mode === "rehearse" && mine && !RUN.revealed.has(i);
-  const tx = masked ? notesHTML(it) + maskText(it.text, S.settings.level) : fullText(it);
-  return `<div class="it ln ${mine ? "mine" : ""}" data-i="${i}" data-a="lineTap" tabindex="0"><div class="who">${esc(title(it.char))}${sc.rec[it.key] ? '<span class="recdot" title="Con audio grabado"></span>' : ""}</div><div class="tx">${tx}</div></div>`;
+  const res = RUN.results.get(i);
+  const tx = masked ? notesHTML(it) + maskText(it.text, S.settings.level) : res ? diffHTML(it, res) : fullText(it) + (mode !== "rehearse" && sc.scores[it.key] != null && mine ? " " + scoreChip(sc.scores[it.key]) : "");
+  const r = actorOf(sc, it.char);
+  return `<div class="it ln ${mine ? "mine" : ""}${lp}" data-i="${i}" data-a="lineTap" tabindex="0"><div class="who">${esc(title(it.char))}${sc.rec[it.key] ? '<span class="recdot" title="Con voz grabada"></span>' : ""}${r && r.actor ? `<small>${esc(r.actor)}</small>` : ""}</div><div class="tx">${tx}</div>${annHTML(sc, it)}</div>`;
 }
 function vGuion(){
   const sc = cur();
   return `<div class="stack">
   <div class="runbar" id="runbar"></div>
-  <p class="small muted" style="margin:0">Toca cualquier réplica para oírla sola. «Escuchar desde aquí» arranca en la última que tocaste.</p>
   <div class="script">${sc.lines.map((it, i) => lineHTML(sc, it, i, "read")).join("")}</div>
 </div>`;
 }
@@ -558,21 +720,44 @@ function vEnsayo(){
   <div class="script">${sc.lines.map((it, i) => lineHTML(sc, it, i, "rehearse")).join("")}</div>
 </div>`;
 }
-function runbarHTML(){
-  const sc = cur(); const rehearse = view === "ensayo";
-  const running = RUN.active;
-  let status;
-  if (running && RUN.waiting) status = `<span class="yourturn">Te toca. Dilo en voz alta</span><div class="bar"><div id="tbar"></div></div>`;
-  else if (running) { const it = sc.lines[RUN.idx]; status = `<span class="muted">${it && it.type === "line" ? "Habla " + esc(title(it.char)) + "…" : "En escena…"}</span>`; }
-  else status = `<span class="muted">${rehearse ? "Haces de <b style=\"color:var(--gold)\">" + esc(title(sc.me)) + "</b>. La app lee al resto." : "Lectura completa con cada personaje en su voz."}</span>`;
-  const controls = running
-    ? `<button class="btn primary big" data-a="advance">${RUN.waiting ? "Ya lo he dicho" : "Saltar"}</button><button class="btn big" data-a="stop">Parar</button><button class="btn ghost" data-a="back">Repetir anterior</button>`
-    : `<button class="btn primary big" data-a="${rehearse ? "startRehearse" : "startListen"}">${rehearse ? "Empezar ensayo" : "Escuchar todo"}</button>${lastTap >= 0 ? `<button class="btn big" data-a="${rehearse ? "rehearseHere" : "listenHere"}">Desde aquí</button>` : ""}`;
-  const opts = rehearse ? `<div class="opts"><span class="lbl">Tu texto</span>${seg("level", S.settings.level, [["full","Entero"],["initials","Iniciales"],["gaps","Con huecos"],["hidden","Oculto"]])}</div>
-    <div class="opts"><span class="lbl">Cuando te toca</span>${seg("pauseMode", S.settings.pauseMode, [["auto","Espera automática"],["tap","Espera a que toque"]])}<span class="lbl">Escenas</span>${seg("context", S.settings.context, [["scene","Completas"],["cue","Solo el pie"]])}</div>`
-    : `<div class="opts">${seg("announce", S.settings.announce, [["true","Decir el personaje"],["false","Solo las frases"]])}${seg("readDirections", S.settings.readDirections, [["false","Sin acotaciones"],["true","Leer acotaciones"]])}</div>`;
-  return `<div class="runstatus" aria-live="polite">${status}</div><div class="row">${controls}</div>${running ? "" : opts}`;
+function fragmentHTML(sc){
+  const scenes = sc.lines.map((x, i) => ({ x, i })).filter(o => o.x.type === "scene");
+  return `<div class="opts">
+    ${scenes.length ? `<span class="lbl">Ir a</span><select id="sceneSel" aria-label="Ir a escena"><option value="">Escena…</option>${scenes.map(o => `<option value="${o.i}">${esc(o.x.text.length > 40 ? o.x.text.slice(0, 40) + "…" : o.x.text)}</option>`).join("")}</select>` : ""}
+    ${sc.loop && sc.loop.on || RUN.pick ? "" : `<button class="btn sm" data-a="loopScene">Repetir ${lastTap >= 0 ? "esa" : "la primera"} escena</button><button class="btn sm ghost" data-a="loopPick">Elegir fragmento</button>`}
+  </div>`;
 }
+function runbarHTML(){
+  const sc = cur(); if (!sc) return ""; const rehearse = view === "ensayo"; const running = RUN.active;
+  let status;
+  const rnd = sc.loop && sc.loop.on && running && RUN.mode !== "replay" ? ` <span class="chip loop">Vuelta ${RUN.round}</span>` : "";
+  if (running && RUN.mode === "replay") status = `<span class="yourturn">Escuchando tu ensayo</span>`;
+  else if (running && RUN.waiting) status = S.settings.pauseMode === "voice" && SR_OK && !srBroken ? `<span class="yourturn">Te toca. Te escucho</span>${rnd}<div class="live" id="live"></div>` : `<span class="yourturn">Te toca. Dilo en voz alta</span>${rnd}<div class="bar"><div id="tbar"></div></div>`;
+  else if (running) { const it = sc.lines[RUN.idx]; status = `<span class="muted">${it && it.type === "line" ? "Habla " + esc(title(it.char)) + "…" : "En escena…"}</span>${rnd}`; }
+  else status = `<span class="muted">${rehearse ? "Haces de <b style=\"color:var(--gold)\">" + esc(title(sc.me)) + "</b>. La app lee al resto." : "Lectura completa, cada personaje con su voz."}</span>`;
+  const canReplay = lastSession && lastSession.sid === sc.id && lastSession.clips.size;
+  const controls = running
+    ? `<button class="btn primary big" data-a="advance">${RUN.waiting ? "Ya lo he dicho" : "Saltar"}</button><button class="btn big" data-a="stop">Parar</button>${RUN.mode !== "replay" ? '<button class="btn ghost" data-a="back">Repetir anterior</button>' : ""}`
+    : `<button class="btn primary big" data-a="${rehearse ? "startRehearse" : "startListen"}">${sc.loop && sc.loop.on ? (rehearse ? "Ensayar el bucle" : "Escuchar el bucle") : rehearse ? "Empezar ensayo" : "Escuchar todo"}</button>${lastTap >= 0 && !(sc.loop && sc.loop.on) ? `<button class="btn big" data-a="${rehearse ? "rehearseHere" : "listenHere"}">Desde aquí</button>` : ""}${rehearse && canReplay ? '<button class="btn big ghost" data-a="replay">Escuchar mi ensayo</button>' : ""}`;
+  const pauseOpts = [["auto","Espera automática"],["tap","Hasta que toque"]]; if (SR_OK) pauseOpts.push(["voice","Me escucha"]);
+  const LV = { full: "texto entero", initials: "iniciales", gaps: "con huecos", hidden: "texto oculto" }, PM = { auto: "espera automática", tap: "hasta que toque", voice: "me escucha" };
+  const loopChip = sc.loop && sc.loop.on ? `<div class="opts"><span class="chip loop">En bucle: ${esc(loopLabel(sc))}</span><button class="btn sm ghost" data-a="loopOff">Quitar bucle</button></div>` : RUN.pick ? `<div class="opts"><span class="chip loop">${RUN.pick === "a" ? "Toca la primera réplica del fragmento" : "Ahora toca la última"}</span><button class="btn sm ghost" data-a="loopCancel">Cancelar</button></div>` : "";
+  const summary = rehearse ? `Opciones: ${LV[S.settings.level]} · ${PM[S.settings.pauseMode] || "espera automática"}` : `Opciones: al tocar, ${S.settings.tapMode === "note" ? "añadir nota" : "escuchar"}`;
+  const opts = rehearse ? `<div class="opts"><span class="lbl">Tu texto</span>${seg("level", S.settings.level, [["full","Entero"],["initials","Iniciales"],["gaps","Con huecos"],["hidden","Oculto"]])}</div>
+      <div class="opts"><span class="lbl">Cuando te toca</span>${seg("pauseMode", S.settings.pauseMode, pauseOpts)}</div>
+      ${fragmentHTML(sc)}
+      <div class="opts"><span class="lbl">Escenas</span>${seg("context", S.settings.context, [["scene","Completas"],["cue","Solo el pie"]])}</div>
+      ${!micBlocked ? `<div class="opts"><span class="lbl">Grabarme</span>${seg("recordSelf", S.settings.recordSelf, [["false","No"],["true","Sí, para escucharme luego"]])}</div>` : ""}
+      <div class="opts"><span class="lbl">Notas</span>${seg("showNotes", S.settings.showNotes, [["true","Ver notas"],["false","Ocultarlas"]])}</div>`
+    : `<div class="opts"><span class="lbl">Al tocar una réplica</span>${seg("tapMode", S.settings.tapMode, [["play","Escucharla"],["note","Añadir nota"]])}</div>
+      ${fragmentHTML(sc)}
+      <div class="opts">${seg("announce", S.settings.announce, [["true","Decir el personaje"],["false","Solo las frases"]])}${seg("readDirections", S.settings.readDirections, [["false","Sin acotaciones"],["true","Leer acotaciones"]])}</div>
+      <div class="opts"><span class="lbl">Notas</span>${seg("showNotes", S.settings.showNotes, [["true","Ver notas"],["false","Ocultarlas"]])}</div>`;
+  const optBlock = `${loopChip}<details class="more" id="runOpts" ${optsOpen ? "open" : ""}><summary>${summary}</summary>${opts}</details>`;
+  return `<div class="runstatus" aria-live="polite">${status}</div><div class="row">${controls}</div>${running ? "" : optBlock}`;
+}
+let optsOpen = false;
+document.addEventListener("toggle", e => { if (e.target && e.target.id === "runOpts") optsOpen = e.target.open; }, true);
 function updateRunUI(){ const rb = $("#runbar"); if (rb) rb.innerHTML = runbarHTML(); }
 let lastTap = -1;
 
@@ -590,16 +775,17 @@ function vMemoria(){
   memIdx = Math.min(memIdx, list.length - 1);
   const it = list[memIdx]; const i = sc.lines.indexOf(it);
   let cue = null; for (let j = i - 1; j >= 0; j--){ if (sc.lines[j].type === "line"){ cue = sc.lines[j]; break; } if (sc.lines[j].type === "scene") break; }
-  const st = sc.progress[it.key];
+  const st = sc.progress[it.key]; const ns = notesFor(sc, it.key);
   return `<div class="stack">
   <div class="row" style="justify-content:space-between"><h2>Memorizar</h2>${filt}</div>
   ${bar}
   <section class="card flash">
-    <div class="row small muted" style="justify-content:space-between"><span>${esc(it.scene || "")}</span><span>${memIdx + 1} de ${list.length}${st === 2 ? ' · <span style="color:var(--ok)">sabida</span>' : st === 1 ? ' · <span style="color:var(--warn)">casi</span>' : ""}</span></div>
+    <div class="row small muted" style="justify-content:space-between"><span>${esc((it.scene || "").split(/[.:]/)[0])}</span><span>${memIdx + 1} de ${list.length}${st === 2 ? ' · <span style="color:var(--ok)">sabida</span>' : st === 1 ? ' · <span style="color:var(--warn)">casi</span>' : ""}${sc.scores[it.key] != null ? " · " + scoreChip(sc.scores[it.key]) : ""}</span></div>
     ${cue ? `<div class="cue"><div class="who">${esc(title(cue.char))} te da el pie</div><div>${fullText(cue)}</div><button class="btn sm ghost" data-a="playCue" style="margin-top:8px">Oír el pie</button></div>` : `<div class="cue muted">Abres tú la escena.</div>`}
-    <div><div class="who" style="color:var(--gold)">${esc(title(sc.me))}</div>
-      <div class="myline">${notesHTML(it)}${memShow ? esc(it.text) : maskText(it.text, S.settings.level === "full" ? "initials" : S.settings.level)}</div></div>
-    <div class="row">${memShow ? `<button class="btn ghost" data-a="playMine">Oír mi réplica</button>` : `<button class="btn primary" data-a="memShow">Ver la réplica</button>`}
+    <div><div class="who" style="color:var(--gold)">${esc(title(it.char))}</div>
+      <div class="myline">${notesHTML(it)}${memShow ? esc(it.text) : maskText(it.text, S.settings.level === "full" ? "initials" : S.settings.level)}</div>
+      ${ns.length && memShow ? `<div class="anns" style="grid-column:auto">${ns.map(annItem).join("")}</div>` : ""}</div>
+    <div class="row">${memShow ? `<button class="btn ghost" data-a="playMine">Oír mi réplica</button><button class="btn ghost" data-a="memNote">Añadir nota</button>` : `<button class="btn primary" data-a="memShow">Ver la réplica</button>`}
       <span class="opts"><span class="lbl">Pista</span>${seg("level", S.settings.level, [["initials","Iniciales"],["gaps","Huecos"],["hidden","Nada"]])}</span></div>
     <div class="rate">
       <button class="btn" data-a="memRate" data-v="0">Repasar</button>
@@ -613,9 +799,7 @@ function vMemoria(){
 }
 
 let recFilter = null, recState = null, pendingUploadKey = null, guideIdx = 0;
-const takes = new Map();   // tomas grabadas pendientes de escuchar y guardar
-const MIC_OK = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia && window.MediaRecorder) && (() => { try { const p = document.permissionsPolicy || document.featurePolicy; return p && p.allowsFeature ? p.allowsFeature("microphone") : true; } catch(e){ return true; } })();
-let micBlocked = !MIC_OK;
+const takes = new Map();
 function recRows(sc){
   const cast = castOf(sc.lines); let f = recFilter === null ? (sc.me || "") : recFilter;
   if (f && !cast.some(c => c[0] === f)) f = "";
@@ -635,9 +819,9 @@ function guideHTML(sc, rows){
   const { it, i } = rows[guideIdx];
   let cue = null; for (let j = i - 1; j >= 0; j--){ if (sc.lines[j].type === "line"){ cue = sc.lines[j]; break; } if (sc.lines[j].type === "scene") break; }
   return `<section class="card flash" id="guide">
-    <div class="row small muted" style="justify-content:space-between"><span>Grabación guiada</span><span>${guideIdx + 1} de ${rows.length}${sc.rec[it.key] ? ' · <span style="color:var(--ok)">ya tiene voz</span>' : ""}</span></div>
+    <div class="row small muted" style="justify-content:space-between"><span>Grabación guiada · ${esc((it.scene || "").split(/[.:]/)[0])}</span><span>${guideIdx + 1} de ${rows.length}${sc.rec[it.key] ? ' · <span style="color:var(--ok)">ya tiene voz</span>' : ""}</span></div>
     ${cue ? `<div class="cue"><div class="who">${esc(title(cue.char))} da el pie</div><div>${fullText(cue)}</div><button class="btn sm ghost" data-a="guideCue" data-i="${sc.lines.indexOf(cue)}" style="margin-top:8px">Oír el pie</button></div>` : `<div class="cue muted">Abre la escena.</div>`}
-    <div><div class="who" style="color:var(--gold)">${esc(title(it.char))}</div><div class="myline">${fullText(it)}</div></div>
+    <div><div class="who" style="color:var(--gold)">${esc(title(it.char))}</div><div class="myline">${fullText(it)}</div>${annHTML(sc, it).replace('class="anns"', 'class="anns" style="grid-column:auto"')}</div>
     <div class="row">${takeActions(sc, it, i, true)}</div>
     <div class="row" style="justify-content:space-between"><button class="btn sm ghost" data-a="guidePrev" ${guideIdx === 0 ? "disabled" : ""}>Anterior</button><button class="btn sm ghost" data-a="guideNext">Siguiente</button></div>
   </section>`;
@@ -647,17 +831,17 @@ function vGrabar(){
   const done = rows.filter(x => sc.rec[x.it.key]).length;
   return `<div class="stack">
   <h2>Grabar las <em>voces</em></h2>
-  ${micBlocked ? `<div class="card small" style="border-color:var(--warn)">En esta ventana el navegador no deja usar el micrófono. «Grabar con el móvil» abre la grabadora del teléfono (en Android); al volver podrás escuchar la toma antes de guardarla. Para grabar directamente aquí, abre El Apuntador desde su dirección web propia.</div>` : `<p class="muted" style="margin:0">Pulsa Grabar, di la réplica, pulsa Parar y escúchala. Si te gusta, Guardar; si no, Repetir.</p>`}
+  ${micBlocked ? `<div class="card small" style="border-color:var(--warn)">En esta ventana el navegador no deja usar el micrófono. «Grabar con el móvil» abre la grabadora del teléfono (en Android). Para grabar directamente, abre El Apuntador desde su dirección web propia.</div>` : `<p class="muted" style="margin:0">Pulsa Grabar, di la réplica, pulsa Parar y escúchala. Si te gusta, Guardar; si no, Repetir.</p>`}
   <div class="row"><label class="f" for="recFilter" style="flex:1;min-width:200px">Personaje que graba
-    <select id="recFilter"><option value="">Todos</option>${cast.map(([c]) => `<option value="${esc(c)}" ${c === f ? "selected" : ""}>${esc(title(c))}${c === sc.me ? " (tú)" : ""}</option>`).join("")}</select></label>
+    <select id="recFilter"><option value="">Todos</option>${cast.map(([c]) => { const r = actorOf(sc, c); return `<option value="${esc(c)}" ${c === f ? "selected" : ""}>${esc(title(c))}${r && r.actor ? " (" + esc(r.actor) + ")" : ""}${c === sc.me ? " · tú" : ""}</option>`; }).join("")}</select></label>
     <span class="chip rec" style="align-self:flex-end;margin-bottom:8px">${done} de ${rows.length} con voz real</span></div>
   ${guideHTML(sc, rows)}
   <section class="card stack">
-    <h3>Compartir voces con el grupo</h3>
-    <p class="small muted" style="margin:0">Cada compañero graba sus réplicas en su móvil y envía su paquete de voces por WhatsApp o correo. Quien lo recibe lo carga aquí y su ensayo suena con las voces de verdad. Funciona si todos tenéis la misma versión del guion.</p>
-    <div class="row"><button class="btn" data-a="exportVoices">Enviar voces${f ? " de " + esc(title(f)) : ""}</button><button class="btn ghost" data-a="importVoices">Cargar voces recibidas</button></div>
+    <h3>Compartir con el grupo</h3>
+    <p class="small muted" style="margin:0">Envía tus voces${f ? " de " + esc(title(f)) : ""} y todas las notas que tengas en el libreto. Quien lo carga oye tus réplicas con tu voz y ve las notas firmadas. Funciona si todos tenéis la misma versión del guion.</p>
+    <div class="row"><button class="btn" data-a="exportVoices">Enviar voces y notas</button><button class="btn ghost" data-a="loadJson">Cargar lo recibido</button></div>
   </section>
-  <details class="card"><summary>Todas las réplicas (${done} de ${rows.length})</summary>${rows.map(({ it, i }) => `<div class="recrow"><div><div class="who" ${it.char === sc.me ? 'style="color:var(--gold)"' : ""}>${esc(title(it.char))}</div><div class="txt">${fullText(it)}</div></div>
+  <details class="card"><summary>Todas las réplicas (${done} de ${rows.length})</summary>${rows.map(({ it, i }) => `<div class="recrow"><div><div class="who" ${isMine(sc, it) ? 'style="color:var(--gold)"' : ""}>${esc(title(it.char))}</div><div class="txt">${fullText(it)}</div></div>
       <div class="acts">${takeActions(sc, it, i, false)}</div></div>`).join("") || '<p class="muted">No hay réplicas.</p>'}</details>
 </div>`;
 }
@@ -668,10 +852,20 @@ function vAjustes(){
   return `<div class="stack">
   <h2>Reparto y <em>ajustes</em></h2>
   <section class="card stack">
+    <h3>La obra</h3>
+    <label class="f" for="scTitle">Título<input type="text" id="scTitle" value="${esc(sc.title)}"></label>
+    <div class="row">
+      <label class="f" for="scVersion" style="flex:1;min-width:150px">Versión del guion<select id="scVersion"><option ${sc.version === "Borrador" ? "selected" : ""}>Borrador</option><option ${sc.version === "Definitivo" ? "selected" : ""}>Definitivo</option></select></label>
+      <label class="f" for="scPremiere" style="flex:1;min-width:150px">Fecha de estreno<input type="date" id="scPremiere" value="${esc(sc.premiere)}"></label>
+      <label class="f" for="scStatus" style="flex:1;min-width:150px">Estado<select id="scStatus"><option value="ensayo" ${sc.status !== "estrenada" ? "selected" : ""}>En ensayo</option><option value="estrenada" ${sc.status === "estrenada" ? "selected" : ""}>Estrenada (al historial)</option></select></label>
+    </div>
+    <div><button class="btn sm primary" data-a="saveObra">Guardar</button></div>
+  </section>
+  <section class="card stack">
     <h3>Personajes y voces</h3>
-    <p class="small muted" style="margin:0">${VOICES.length ? `Tu dispositivo tiene ${VOICES.length} ${VOICES.length === 1 ? "voz" : "voces"} en español. Con el tono distinguimos personajes aunque compartan voz.` : "Este navegador aún no ha cargado voces. Prueba en Chrome o Safari actualizados."}</p>
-    <div>${cast.map(([c, n]) => { const cfg = voiceCfg(sc, c); const raw = sc.cast[c] || {}; return `<div class="castrow">
-      <div class="nm"><div style="${c === sc.me ? "color:var(--gold)" : ""}">${esc(title(c))}${c === sc.me ? " · tú" : ""}</div><div class="small muted">${n} réplicas</div></div>
+    <p class="small muted" style="margin:0">${VOICES.length ? `Tu dispositivo tiene ${VOICES.length} ${VOICES.length === 1 ? "voz" : "voces"} en español. Con el tono distinguimos personajes aunque compartan voz. Las réplicas grabadas suenan siempre con la voz real.` : "Este navegador aún no ha cargado voces. Prueba en Chrome o Safari actualizados."}</p>
+    <div>${cast.filter(c => !isGroup(c[0])).map(([c, n]) => { const cfg = voiceCfg(sc, c); const raw = sc.cast[c] || {}; const r = actorOf(sc, c); return `<div class="castrow">
+      <div class="nm"><div style="${c === sc.me ? "color:var(--gold)" : ""}">${esc(title(c))}${c === sc.me ? " · tú" : ""}</div><div class="small muted">${r && r.actor ? esc(r.actor) + " · " : ""}${n} réplicas${r && r.desc ? "<br>" + esc(r.desc) : ""}</div></div>
       <select data-cast="voice" data-c="${esc(c)}" aria-label="Voz de ${esc(title(c))}">${vopts(raw.voice)}</select>
       <label class="f small" style="gap:2px">Tono ${cfg.pitch.toFixed(2)}<input type="range" min="0.5" max="1.6" step="0.05" value="${cfg.pitch}" data-cast="pitch" data-c="${esc(c)}"></label>
       <button class="btn sm" data-a="testVoice" data-c="${esc(c)}">Probar</button></div>`; }).join("")}</div>
@@ -685,46 +879,47 @@ function vAjustes(){
   </section>
   <section class="card stack">
     <h3>Personal</h3>
-    <div class="row"><label class="f" for="pName" style="flex:1;min-width:180px">Tu nombre<input type="text" id="pName" value="${esc(S.profile.name)}"></label>
+    <div class="row"><label class="f" for="pName" style="flex:1;min-width:180px">Tu nombre (firma tus notas)<input type="text" id="pName" value="${esc(S.profile.name)}"></label>
     <label class="f" for="pGroup" style="flex:2;min-width:220px">Grupo de teatro<input type="text" id="pGroup" value="${esc(S.profile.group)}"></label></div>
+    <label class="chk" for="pDir"><input type="checkbox" id="pDir" ${S.profile.dir ? "checked" : ""}> Formo parte de la dirección: mis notas salen como «Dirección»</label>
     <div><button class="btn sm" data-a="saveProfile">Guardar</button></div>
   </section>
   <details class="card"><summary>Texto del guion</summary>
     <div class="stack" style="margin-top:12px">
-      <p class="small muted" style="margin:0">Formato: <b>PERSONAJE: réplica</b>, una por línea. Las acotaciones van entre paréntesis. Las líneas que empiezan por ESCENA o ACTO separan escenas. Al cambiar una réplica se pierde su progreso y su audio; el resto se conserva.</p>
-      <label class="f" for="scTitle">Título<input type="text" id="scTitle" value="${esc(sc.title)}"></label>
+      <p class="small muted" style="margin:0">Formato: <b>PERSONAJE (Actriz): réplica</b>, una por línea. Las acotaciones van entre paréntesis y las líneas que empiezan por ESCENA o ACTO separan escenas. Si cambias una réplica, esa pierde su voz, progreso y notas; las demás se conservan.</p>
       <textarea id="scRaw" aria-label="Texto del guion">${esc(sc.raw)}</textarea>
       <div class="row"><button class="btn primary" data-a="saveRaw">Guardar cambios</button></div>
     </div></details>
-  <details class="card"><summary>Copia y compartir</summary>
+  <details class="card"><summary>Enviar el guion</summary>
     <div class="stack" style="margin-top:12px">
-      <p class="small muted" style="margin:0">Copia el guion con el reparto y el progreso para pasarlo a otro móvil o a un compañero. Los audios se quedan en este dispositivo.</p>
-      <div class="row"><button class="btn" data-a="copyJson">Copiar guion</button>${!IN_FRAME ? '<button class="btn" data-a="dlJson">Descargar copia</button>' : ""}<button class="btn ghost" data-a="loadJson">Cargar copia desde archivo</button></div>
-      <textarea id="jsonPaste" placeholder="…o pega aquí una copia y pulsa Cargar" style="min-height:90px"></textarea>
+      <p class="small muted" style="margin:0">Envía el guion con el reparto y las notas para que otra persona lo cargue en su móvil. Las voces se envían desde «Grabar».</p>
+      <div class="row"><button class="btn primary" data-a="shareScript">Enviar guion</button><button class="btn ghost" data-a="loadJson">Cargar guion o voces recibidas</button></div>
+      <textarea id="jsonPaste" placeholder="…o pega aquí una copia y pulsa Cargar" style="min-height:80px"></textarea>
       <div><button class="btn sm" data-a="pasteJson">Cargar copia pegada</button></div>
     </div></details>
-  <section class="card row" style="justify-content:space-between"><span class="muted small">Borrar «${esc(sc.title)}» de este dispositivo</span><button class="btn sm danger" data-a="delScript">Borrar guion</button></section>
+  <section class="card row" style="justify-content:space-between"><span class="muted small">Borrar «${esc(sc.title)}» de este dispositivo</span><button class="btn sm danger" data-a="delScript">Borrar obra</button></section>
 </div>`;
 }
 
 let draft = { title: "", raw: "" };
 function vNuevo(){
-  const lines = parse(draft.raw); const cast = castOf(lines);
+  const p = parse(draft.raw); const cast = castOf(p.lines);
+  if (!draft.title && p.meta.title) draft.title = p.meta.title;
   return `<div class="stack">
   <h2>Nuevo <em>guion</em></h2>
-  <p class="muted" style="margin:0">Pega el borrador que os ha pasado la directora o súbelo en PDF, Word o texto. La app detecta personajes, réplicas, acotaciones y escenas.</p>
-  <label class="f" for="nTitle">Título de la obra<input type="text" id="nTitle" value="${esc(draft.title)}" placeholder="Ej.: La casa de Bernarda (borrador 1)"></label>
+  <p class="muted" style="margin:0">Sube el borrador que os ha pasado la directora en PDF, Word o texto, o pégalo. La app detecta personajes, actrices, réplicas, acotaciones y escenas.</p>
+  <label class="f" for="nTitle">Título de la obra<input type="text" id="nTitle" value="${esc(draft.title)}" placeholder="Título"></label>
   <div class="row"><button class="btn" data-a="pickDoc">Subir archivo (PDF, Word, TXT)</button><span class="small muted" id="docStatus"></span></div>
-  <textarea id="nRaw" placeholder="ESCENA 1&#10;MARÍA: Buenas tardes.&#10;(Entra JUAN)&#10;JUAN: ¿Llego tarde?">${esc(draft.raw)}</textarea>
-  <section class="card stack" id="nPreview">${previewHTML(lines, cast)}</section>
+  <textarea id="nRaw" placeholder="ESCENA 1&#10;MARÍA (Ane): Buenas tardes.&#10;(Entra JUAN)&#10;JUAN (Iker): ¿Llego tarde?">${esc(draft.raw)}</textarea>
+  <section class="card stack" id="nPreview">${previewHTML(p, cast)}</section>
   <div class="row"><button class="btn primary big" data-a="createScript" ${cast.length ? "" : "disabled"}>Crear guion</button><button class="btn ghost" data-go="inicio">Cancelar</button></div>
 </div>`;
 }
-function previewHTML(lines, cast){
+function previewHTML(p, cast){
   if (!cast.length) return `<span class="muted small">Aún no detecto personajes. Revisa que cada réplica empiece por el nombre seguido de dos puntos.</span>`;
-  const sc = lines.filter(l => l.type === "scene").length, dir = lines.filter(l => l.type === "dir").length, ln = lines.filter(l => l.type === "line").length;
+  const L = p.lines; const sc = L.filter(l => l.type === "scene").length, dir = L.filter(l => l.type === "dir").length, ln = L.filter(l => l.type === "line").length;
   return `<div class="small muted">${ln} réplicas · ${sc} escenas · ${dir} acotaciones</div>
-  <label class="f" for="nMe">¿Qué personaje haces?<select id="nMe"><option value="">Lo elijo luego</option>${cast.map(([c, n]) => `<option value="${esc(c)}">${esc(title(c))} · ${n}</option>`).join("")}</select></label>
+  <label class="f" for="nMe">¿Qué personaje haces?<select id="nMe"><option value="">Lo elijo luego</option>${cast.filter(c => !isGroup(c[0])).map(([c, n]) => `<option value="${esc(c)}">${esc(title(c))}${p.meta.roster[c] && p.meta.roster[c].actor ? " (" + esc(p.meta.roster[c].actor) + ")" : ""} · ${n}</option>`).join("")}</select></label>
   <div class="row">${cast.map(([c, n]) => `<span class="chip">${esc(title(c))} · ${n}</span>`).join("")}</div>`;
 }
 
@@ -750,15 +945,15 @@ async function readDoc(file){
     if (n.endsWith(".pdf")) txt = await pdfText(await file.arrayBuffer());
     else if (n.endsWith(".docx")) txt = await docxText(await file.arrayBuffer());
     else txt = await file.text();
-    draft.raw = txt.trim(); if (!draft.title) draft.title = file.name.replace(/\.[^.]+$/, "");
+    draft.raw = txt.trim(); draft.title = "";
     render(); toast("Texto cargado. Revísalo antes de crear el guion.");
   } catch(e){ if (st) st.textContent = ""; toast("No he podido leer ese archivo. Copia el texto y pégalo en el cuadro."); }
 }
 
-/* ============ Grabación ============ */
+/* ============ Grabación de voces ============ */
 async function recToggle(key){
   if (recState){ const same = recState.key === key; recState.mr.stop(); if (same) return; await sleep(150); }
-  if (HAS_TTS) speechSynthesis.cancel(); if (currentAudio) currentAudio.pause();
+  hush();
   try {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } });
     const mr = new MediaRecorder(stream); const chunks = [];
@@ -767,79 +962,138 @@ async function recToggle(key){
     mr.start(); recState = { key, mr }; render();
   } catch(e){ micBlocked = true; recState = null; render(); toast("No hay acceso al micrófono. Revisa el permiso del navegador o usa «Grabar con el móvil»."); }
 }
-async function saveTake(sc, key){
-  const b = takes.get(key); if (!b) return;
-  await audioPut(sc.id + ":" + key, b); sc.rec[key] = 1; takes.delete(key); save();
-}
+async function saveTake(sc, key){ const b = takes.get(key); if (!b) return; await audioPut(sc.id + ":" + key, b); sc.rec[key] = 1; takes.delete(key); save(); }
+
+/* ============ Compartir: guion, voces y notas ============ */
 const blobToB64 = b => new Promise(r => { const fr = new FileReader(); fr.onload = () => r(String(fr.result).split(",")[1] || ""); fr.onerror = () => r(""); fr.readAsDataURL(b); });
 function b64ToBlob(d, mime){ const bin = atob(d); const u = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i); return new Blob([u], { type: mime || "audio/webm" }); }
-const norm = s => s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9|]+/g, " ").trim();
+function notesExport(sc){ const out = []; for (const l of sc.lines) if (l.type === "line") for (const n of notesFor(sc, l.key)) out.push({ key: l.key, char: l.char, text: l.text, n }); return out; }
+async function shareFile(name, text, fallbackToTextarea){
+  const file = new File([text], name.replace(/[\\/:*?"<>|]/g, ""), { type: "text/plain" });
+  try { if (navigator.canShare && navigator.canShare({ files: [file] })){ await navigator.share({ files: [file], title: name }); return true; } } catch(e){ if (e && e.name === "AbortError") return true; }
+  if (!IN_FRAME){ const a = document.createElement("a"); a.href = URL.createObjectURL(file); a.download = file.name; document.body.appendChild(a); a.click(); a.remove(); toast("Archivo guardado en Descargas. Envíalo por WhatsApp o correo."); return true; }
+  if (fallbackToTextarea){ try { await navigator.clipboard.writeText(text); toast("Copiado. Pégalo en un mensaje."); return true; } catch(e){} }
+  toast("Desde esta ventana no se pueden enviar archivos. Hazlo desde la dirección web propia de El Apuntador."); return false;
+}
+function scriptPack(sc){ return JSON.stringify({ apuntador: 2, kind: "guion", title: sc.title, raw: sc.raw, version: sc.version, premiere: sc.premiere, cast: sc.cast, notes: notesExport(sc) }); }
 async function exportVoices(sc, f){
   const rows = sc.lines.filter(l => l.type === "line" && sc.rec[l.key] && (!f || l.char === f));
-  if (!rows.length){ toast("Todavía no hay voces grabadas" + (f ? " de " + title(f) : "") + "."); return; }
+  const notes = notesExport(sc);
+  if (!rows.length && !notes.length){ toast("Todavía no hay voces" + (f ? " de " + title(f) : "") + " ni notas que enviar."); return; }
   const items = [];
   for (const l of rows){ const b = await audioGet(sc.id + ":" + l.key); if (b) items.push({ key: l.key, char: l.char, text: l.text, mime: b.type || "audio/webm", data: await blobToB64(b) }); }
-  const name = ("Voces " + (f ? title(f) : "del grupo") + " - " + sc.title).replace(/[\\/:*?"<>|]/g, "") + ".apuntador.txt";
-  const file = new File([JSON.stringify({ apuntador: 1, kind: "voces", title: sc.title, char: f || "", items })], name, { type: "text/plain" });
-  try { if (navigator.canShare && navigator.canShare({ files: [file] })){ await navigator.share({ files: [file], title: name }); return; } } catch(e){ if (e && e.name === "AbortError") return; }
-  if (IN_FRAME){ toast("Desde esta ventana no se pueden enviar archivos. Hazlo desde la dirección web propia de El Apuntador."); return; }
-  const a = document.createElement("a"); a.href = URL.createObjectURL(file); a.download = name; document.body.appendChild(a); a.click(); a.remove();
-  toast("Paquete guardado en Descargas. Envíalo por WhatsApp o correo.");
+  const who = S.profile.name || (f ? title(f) : "del grupo");
+  await shareFile("Voces y notas de " + who + " - " + sc.title + ".apuntador.txt", JSON.stringify({ apuntador: 2, kind: "voces", title: sc.title, char: f || "", by: S.profile.name || "", items, notes }));
 }
+function matcher(sc){
+  const byKey = new Map(), byText = new Map();
+  for (const l of sc.lines) if (l.type === "line"){ byKey.set(l.key, l); const t = norm(l.char + "|" + l.text); if (!byText.has(t)) byText.set(t, l); }
+  return x => byKey.get(x.key) || byText.get(norm(x.char + "|" + x.text)) || null;
+}
+function mergeNotes(sc, list){
+  const find = matcher(sc); let ok = 0;
+  for (const x of list || []){ const l = find(x); if (!l || !x.n || !x.n.id) continue; const arr = sc.notes[l.key] = sc.notes[l.key] || []; if (!arr.some(n => n.id === x.n.id)){ arr.push(x.n); ok++; } }
+  for (const k in sc.notes) sc.notes[k].sort((a, b) => (b.dir - a.dir) || (a.ts - b.ts));
+  return ok;
+}
+let pendingImport = null;
 async function importAny(text){
   let d; try { d = JSON.parse(text); } catch(e){ toast("Ese archivo no es de El Apuntador."); return; }
-  if (d && d.raw) return importJson(text);
+  if (d && d.raw) return importScript(d);
   if (!d || d.kind !== "voces" || !Array.isArray(d.items)){ toast("Ese archivo no es de El Apuntador."); return; }
-  const sc = cur(); const byKey = new Map(), byText = new Map();
-  for (const l of sc.lines) if (l.type === "line"){ byKey.set(l.key, l); const t = norm(l.char + "|" + l.text); if (!byText.has(t)) byText.set(t, l); }
-  let ok = 0, miss = 0;
-  for (const it of d.items){ const l = byKey.get(it.key) || byText.get(norm(it.char + "|" + it.text)); if (!l || !it.data){ miss++; continue; } await audioPut(sc.id + ":" + l.key, b64ToBlob(it.data, it.mime)); sc.rec[l.key] = 1; ok++; }
-  save(); render();
-  toast(ok + (ok === 1 ? " voz cargada" : " voces cargadas") + (miss ? ". " + miss + " no encajan con este guion: puede que tengáis versiones distintas." : "."));
+  let sc = cur(); const t = S.scripts.find(s => norm(s.title) === norm(d.title || "")); if (t) sc = t;
+  if (!sc){ toast("Primero carga el guion de la obra."); return; }
+  const find = matcher(sc); let ok = 0, miss = 0;
+  for (const it of d.items){ const l = find(it); if (!l || !it.data){ miss++; continue; } await audioPut(sc.id + ":" + l.key, b64ToBlob(it.data, it.mime)); sc.rec[l.key] = 1; ok++; }
+  const nn = mergeNotes(sc, d.notes);
+  S.current = sc.id; save(); render();
+  toast(`${ok} ${ok === 1 ? "voz" : "voces"} y ${nn} ${nn === 1 ? "nota nueva" : "notas nuevas"} en «${sc.title}»` + (miss ? `. ${miss} réplicas no encajan con tu versión del guion.` : "."));
+}
+function importScript(d){
+  const ex = S.scripts.find(s => norm(s.title) === norm(d.title || ""));
+  if (ex){ pendingImport = d; modal(`<h2>Ya tienes «${esc(ex.title)}»</h2><p class="muted">¿Es una versión nueva del mismo guion?</p><p class="small muted">Si la actualizas se conservan tus voces, notas y progreso en todas las réplicas que no cambian.</p><div class="row"><button class="btn primary" data-a="impUpdate">Actualizar la mía</button><button class="btn" data-a="impNew">Guardarla como otra obra</button><button class="btn ghost" data-a="closeModal">Cancelar</button></div>`); return; }
+  addImported(d);
+}
+function addImported(d){
+  const s = freshScript(d.title || "", d.raw, d.me || ""); s.cast = d.cast || {}; s.version = d.version || "Borrador"; s.premiere = d.premiere || "";
+  if (d.progress) s.progress = d.progress;
+  if (Array.isArray(d.notes)) mergeNotes(s, d.notes); else if (d.notes && typeof d.notes === "object") s.notes = d.notes;
+  S.scripts.unshift(s); S.current = s.id; save(); toast("Guion cargado: " + s.title + ". Elige tu personaje."); go("inicio");
+}
+function updateRaw(sc, raw){
+  const p = parse(raw); const keys = new Set(p.lines.filter(l => l.type === "line").map(l => l.key));
+  for (const k of Object.keys(sc.progress)) if (!keys.has(k)) delete sc.progress[k];
+  for (const k of Object.keys(sc.scores)) if (!keys.has(k)) delete sc.scores[k];
+  for (const k of Object.keys(sc.notes)) if (!keys.has(k)) delete sc.notes[k];
+  for (const k of Object.keys(sc.rec)) if (!keys.has(k)){ delete sc.rec[k]; audioDel(sc.id + ":" + k); }
+  sc.raw = raw; sc.lines = p.lines; sc.meta = p.meta; sc.updated = Date.now(); sc.loop = null;
+  if (sc.me && !p.lines.some(l => l.char === sc.me)) sc.me = "";
+  return p.lines.filter(l => l.type === "line").length;
 }
 
 /* ============ Eventos ============ */
 document.addEventListener("click", async e => {
-  const g = e.target.closest("[data-go]"); if (g){ if (g.dataset.go === "nuevo") draft = { title: "", raw: "" }; go(g.dataset.go); return; }
+  const g = e.target.closest("[data-go]"); if (g){ if (g.disabled) return; if (g.dataset.go === "nuevo") draft = { title: "", raw: "" }; go(g.dataset.go); return; }
   const sg = e.target.closest("[data-seg]");
-  if (sg){ let v = sg.dataset.v; if (v === "true") v = true; else if (v === "false") v = false; S.settings[sg.dataset.seg] = v; if (sg.dataset.seg === "memFilter") memIdx = 0; save(); render(); return; }
+  if (sg){ let v = sg.dataset.v; if (v === "true") v = true; else if (v === "false") v = false; S.settings[sg.dataset.seg] = v; if (sg.dataset.seg === "memFilter") memIdx = 0; if (sg.dataset.seg === "pauseMode") srBroken = false; save(); render(); return; }
   const el = e.target.closest("[data-a]"); if (!el) return;
   const a = el.dataset.a; const sc = cur();
   switch (a){
     case "closeModalBg": if (e.target === el) closeModal(); break;
     case "closeModal": closeModal(); break;
-    case "again": closeModal(); runFrom(0, "rehearse"); break;
+    case "again": closeModal(); runFrom(sc.loop && sc.loop.on ? sc.loop.a : 0, "rehearse"); break;
+    case "replay": closeModal(); if (lastSession){ if (view !== "ensayo"){ view = "ensayo"; render(); } runFrom(lastSession.a, "replay", { end: lastSession.b, clips: lastSession.clips }); } break;
+    case "install": if (installEvt){ installEvt.prompt(); installEvt = null; render(); } break;
     case "goRehearse": go("ensayo"); break;
     case "goRehearseHidden": S.settings.level = "hidden"; save(); go("ensayo"); break;
     case "listenAll": view = "guion"; render(); runFrom(0, "listen"); break;
-    case "startListen": runFrom(0, "listen"); break;
-    case "startRehearse": runFrom(0, "rehearse"); break;
+    case "startListen": runFrom(sc.loop && sc.loop.on ? sc.loop.a : 0, "listen"); break;
+    case "startRehearse": runFrom(sc.loop && sc.loop.on ? sc.loop.a : 0, "rehearse"); break;
     case "listenHere": runFrom(Math.max(0, lastTap), "listen"); break;
     case "rehearseHere": runFrom(Math.max(0, lastTap), "rehearse"); break;
     case "advance": advance(); break;
     case "stop": stopAll(); render(); break;
     case "back": { const L = sc.lines; let j = RUN.idx - 1; while (j > 0 && L[j].type !== "line") j--; runFrom(Math.max(0, j), RUN.mode); break; }
     case "lineTap": {
-      const i = +el.dataset.i; lastTap = i;
-      if (RUN.active) { runFrom(i, RUN.mode); break; }
+      const i = +el.dataset.i; const it = sc.lines[i];
+      if (RUN.pick){
+        if (RUN.pick === "a"){ RUN.pickA = i; RUN.pick = "b"; updateRunUI(); }
+        else { const x = Math.min(RUN.pickA, i), y = Math.max(RUN.pickA, i); sc.loop = { a: x, b: y, on: true }; RUN.pick = null; save(); render(); toast("Bucle listo: " + loopLabel(sc) + "."); }
+        break;
+      }
+      lastTap = i;
+      if (RUN.active){ runFrom(i, RUN.mode === "replay" ? "rehearse" : RUN.mode); break; }
       document.querySelectorAll(".it.now").forEach(x => x.classList.remove("now")); el.classList.add("now"); updateRunUI();
-      const it = sc.lines[i]; if (view === "guion" || it.char !== sc.me) { if (HAS_TTS) speechSynthesis.cancel(); if (currentAudio) currentAudio.pause(); playLine(sc, it); }
+      if (it.type !== "line") break;
+      if (view === "guion" && S.settings.tapMode === "note"){ noteModal(i); break; }
+      if (view === "guion" || !isMine(sc, it)){ hush(); playLine(sc, it); }
       break; }
+    case "loopScene": { const [x, y] = sceneBounds(sc, lastTap >= 0 ? lastTap : 0); sc.loop = { a: x, b: y, on: true }; save(); render(); toast("En bucle: " + loopLabel(sc) + ". Pulsa el botón dorado para empezar."); break; }
+    case "loopPick": RUN.pick = "a"; updateRunUI(); break;
+    case "loopCancel": RUN.pick = null; updateRunUI(); break;
+    case "loopOff": sc.loop = null; save(); render(); break;
     case "saveName": { const v = $("#nameIn").value.trim(); if (v){ S.profile.name = v; save(); render(); } break; }
-    case "useScript": S.current = el.dataset.id; save(); memIdx = 0; render(); break;
+    case "useScript": stopAll(); S.current = el.dataset.id; save(); memIdx = 0; lastTap = -1; go("inicio"); break;
     case "memShow": memShow = true; render(); break;
+    case "memNote": noteModal(sc.lines.indexOf(memList(sc)[memIdx])); break;
     case "memRate": { const list = memList(sc); const it = list[memIdx]; sc.progress[it.key] = +el.dataset.v; if (!S.days.includes(today())) S.days.push(today()); save(); memShow = false;
-      if (S.settings.memFilter === "pending" && +el.dataset.v === 2) {} else memIdx = (memIdx + 1) % Math.max(1, memList(sc).length);
+      if (!(S.settings.memFilter === "pending" && +el.dataset.v === 2)) memIdx = (memIdx + 1) % Math.max(1, memList(sc).length);
       render(); break; }
     case "memPrev": memIdx = Math.max(0, memIdx - 1); memShow = false; render(); break;
     case "memNext": memIdx = (memIdx + 1) % Math.max(1, memList(sc).length); memShow = false; render(); break;
-    case "playCue": { const it = memList(sc)[memIdx]; const i = sc.lines.indexOf(it); for (let j = i - 1; j >= 0; j--) if (sc.lines[j].type === "line"){ playLine(sc, sc.lines[j]); break; } break; }
-    case "playMine": playLine(sc, memList(sc)[memIdx]); break;
+    case "playCue": { const it = memList(sc)[memIdx]; const i = sc.lines.indexOf(it); for (let j = i - 1; j >= 0; j--) if (sc.lines[j].type === "line"){ hush(); playLine(sc, sc.lines[j]); break; } break; }
+    case "playMine": hush(); playLine(sc, memList(sc)[memIdx]); break;
+    case "noteSave": {
+      const i = +el.dataset.i; const it = sc.lines[i]; const t = ($("#noteTxt").value || "").trim(); if (!t){ toast("Escribe la nota primero."); break; }
+      if (!S.profile.name){ const by = ($("#noteBy") || {}).value; if (by && by.trim()) S.profile.name = by.trim(); }
+      const arr = sc.notes[it.key] = sc.notes[it.key] || []; arr.push({ id: uid() + uid(), by: S.profile.name || "", dir: !!S.profile.dir, text: t, ts: Date.now() });
+      arr.sort((x, y) => (y.dir - x.dir) || (x.ts - y.ts)); save(); closeModal(); render(); toast("Nota guardada."); break; }
+    case "noteDel": { const it = sc.lines[+el.dataset.i]; sc.notes[it.key] = notesFor(sc, it.key).filter(n => n.id !== el.dataset.id); if (!sc.notes[it.key].length) delete sc.notes[it.key]; save(); noteModal(+el.dataset.i); render(); break; }
     case "recToggle": recToggle(el.dataset.k); break;
     case "upload": pendingUploadKey = el.dataset.k; $("#audioIn").value = ""; $("#audioIn").click(); break;
-    case "recPlay": { const b = await audioGet(sc.id + ":" + el.dataset.k); if (b) playBlob(b); else toast("Ese audio ya no está en este dispositivo."); break; }
+    case "recPlay": { const b = await audioGet(sc.id + ":" + el.dataset.k); if (b){ hush(); playBlob(b); } else toast("Ese audio ya no está en este dispositivo."); break; }
     case "recDel": await audioDel(sc.id + ":" + el.dataset.k); delete sc.rec[el.dataset.k]; save(); render(); break;
-    case "takePlay": { const b = takes.get(el.dataset.k); if (b){ if (currentAudio) currentAudio.pause(); playBlob(b); } break; }
+    case "takePlay": { const b = takes.get(el.dataset.k); if (b){ hush(); playBlob(b); } break; }
     case "takeDrop": takes.delete(el.dataset.k); render(); break;
     case "takeSave": {
       await saveTake(sc, el.dataset.k); toast("Guardada. El ensayo ya usa esta voz.");
@@ -847,57 +1101,50 @@ document.addEventListener("click", async e => {
       render(); break; }
     case "guidePrev": guideIdx = Math.max(0, guideIdx - 1); render(); break;
     case "guideNext": guideIdx++; render(); break;
-    case "guideCue": if (HAS_TTS) speechSynthesis.cancel(); if (currentAudio) currentAudio.pause(); playLine(sc, sc.lines[+el.dataset.i]); break;
+    case "guideCue": hush(); playLine(sc, sc.lines[+el.dataset.i]); break;
     case "exportVoices": exportVoices(sc, recRows(sc).f); break;
-    case "importVoices": $("#jsonIn").value = ""; $("#jsonIn").click(); break;
-    case "ttsPlay": playLine(sc, sc.lines[+el.dataset.i]); break;
-    case "testVoice": { const c = el.dataset.c; const it = sc.lines.find(l => l.type === "line" && l.char === c && !sc.rec[l.key]) || { text: "Hola, soy " + title(c) }; if (HAS_TTS) speechSynthesis.cancel(); say(it.text, voiceCfg(sc, c)); break; }
-    case "saveProfile": S.profile.name = $("#pName").value.trim(); S.profile.group = $("#pGroup").value.trim(); save(); toast("Guardado."); render(); break;
-    case "saveRaw": {
-      const raw = $("#scRaw").value; const t = $("#scTitle").value.trim() || sc.title;
-      const lines = parse(raw); const keys = new Set(lines.filter(l => l.type === "line").map(l => l.key));
-      for (const k of Object.keys(sc.progress)) if (!keys.has(k)) delete sc.progress[k];
-      for (const k of Object.keys(sc.rec)) if (!keys.has(k)){ delete sc.rec[k]; audioDel(sc.id + ":" + k); }
-      sc.raw = raw; sc.lines = lines; sc.title = t; sc.updated = Date.now();
-      if (sc.me && !lines.some(l => l.char === sc.me)) sc.me = "";
-      save(); toast("Guion actualizado: " + lines.filter(l => l.type === "line").length + " réplicas."); render(); break; }
-    case "copyJson": { const data = JSON.stringify({ apuntador: 1, title: sc.title, raw: sc.raw, me: sc.me, cast: sc.cast, progress: sc.progress }); try { await navigator.clipboard.writeText(data); toast("Copiado. Pégalo en un mensaje o en otro dispositivo."); } catch(err){ $("#jsonPaste").value = data; $("#jsonPaste").select(); toast("No he podido copiar solo. El texto está seleccionado abajo: cópialo tú."); } break; }
-    case "dlJson": { const data = JSON.stringify({ apuntador: 1, title: sc.title, raw: sc.raw, me: sc.me, cast: sc.cast, progress: sc.progress }, null, 1); const aEl = document.createElement("a"); aEl.href = URL.createObjectURL(new Blob([data], { type: "application/json" })); aEl.download = sc.title.replace(/[^\wáéíóúñ\- ]/gi, "") + ".apuntador.json"; aEl.click(); break; }
+    case "ttsPlay": hush(); playLine(sc, sc.lines[+el.dataset.i]); break;
+    case "testVoice": { const c = el.dataset.c; const it = sc.lines.find(l => l.type === "line" && l.char === c) || { text: "Hola, soy " + title(c) }; hush(); say(it.text, voiceCfg(sc, c)); break; }
+    case "saveProfile": S.profile.name = $("#pName").value.trim(); S.profile.group = $("#pGroup").value.trim(); S.profile.dir = $("#pDir").checked; save(); toast("Guardado."); render(); break;
+    case "saveObra": {
+      sc.title = $("#scTitle").value.trim() || sc.title; sc.version = $("#scVersion").value; sc.premiere = $("#scPremiere").value; const was = sc.status; sc.status = $("#scStatus").value; save();
+      toast(sc.status === "estrenada" && was !== "estrenada" ? "¡Enhorabuena! La obra pasa al historial." : "Guardado."); render(); break; }
+    case "saveRaw": { const n = updateRaw(sc, $("#scRaw").value); save(); toast("Guion actualizado: " + n + " réplicas."); render(); break; }
+    case "shareScript": shareFile("Guion - " + sc.title + ".apuntador.txt", scriptPack(sc), true); break;
     case "loadJson": $("#jsonIn").value = ""; $("#jsonIn").click(); break;
     case "pasteJson": importAny($("#jsonPaste").value); break;
-    case "delScript": modal(`<h2>¿Borrar el guion?</h2><p class="muted">Se borran «${esc(sc.title)}», su progreso y sus audios de este dispositivo.</p><div class="row" style="justify-content:center"><button class="btn danger" data-a="delConfirm">Borrar</button><button class="btn" data-a="closeModal">Cancelar</button></div>`); break;
-    case "delConfirm": { for (const k of Object.keys(sc.rec)) audioDel(sc.id + ":" + k); S.scripts = S.scripts.filter(s => s.id !== sc.id); if (!S.scripts.length){ const d = defaults(); S.scripts = d.scripts; } S.current = S.scripts[0].id; save(); closeModal(); go("inicio"); break; }
+    case "impUpdate": { const d = pendingImport; pendingImport = null; closeModal(); if (!d) break; const ex = S.scripts.find(s => norm(s.title) === norm(d.title || "")); const n = updateRaw(ex, d.raw); if (d.version) ex.version = d.version; if (d.premiere) ex.premiere = d.premiere; for (const c in d.cast || {}) if (!ex.cast[c]) ex.cast[c] = d.cast[c]; if (Array.isArray(d.notes)) mergeNotes(ex, d.notes); S.current = ex.id; save(); toast("«" + ex.title + "» actualizada: " + n + " réplicas."); go("inicio"); break; }
+    case "impNew": { const d = pendingImport; pendingImport = null; closeModal(); if (d){ d.title = (d.title || "Obra") + " (" + fmtDate(today()) + ")"; addImported(d); } break; }
+    case "delScript": modal(`<h2>¿Borrar la obra?</h2><p class="muted">Se borran «${esc(sc.title)}», sus voces, notas y progreso de este dispositivo. Si solo ha terminado, mejor márcala como estrenada para que quede en el historial.</p><div class="row" style="justify-content:center"><button class="btn danger" data-a="delConfirm">Borrar</button><button class="btn" data-a="closeModal">Cancelar</button></div>`, true); break;
+    case "delConfirm": { for (const k of Object.keys(sc.rec)) audioDel(sc.id + ":" + k); S.scripts = S.scripts.filter(s => s.id !== sc.id); S.current = S.scripts[0] ? S.scripts[0].id : null; save(); closeModal(); go("inicio"); break; }
     case "pickDoc": $("#docIn").value = ""; $("#docIn").click(); break;
     case "createScript": {
-      draft.title = $("#nTitle").value.trim() || "Obra sin título"; draft.raw = $("#nRaw").value;
+      draft.title = $("#nTitle").value.trim(); draft.raw = $("#nRaw").value;
       const me = $("#nMe") ? $("#nMe").value : "";
       const s = freshScript(draft.title, draft.raw, me); S.scripts.unshift(s); S.current = s.id; save(); draft = { title: "", raw: "" };
       toast("Guion creado." + (me ? "" : " Elige tu personaje en Inicio.")); go("inicio"); break; }
   }
 });
-function importJson(txt){
-  try { const d = JSON.parse(txt); if (!d || !d.raw) throw 0; const s = freshScript(d.title || "Obra", d.raw, d.me || ""); s.cast = d.cast || {}; s.progress = d.progress || {}; S.scripts.unshift(s); S.current = s.id; save(); toast("Guion cargado."); go("inicio"); }
-  catch(e){ toast("Esa copia no es válida. Asegúrate de pegarla entera."); }
-}
 document.addEventListener("change", async e => {
   const t = e.target; const sc = cur();
-  if (t.id === "pickPlay"){ stopAll(); S.current = t.value; memIdx = 0; save(); render(); }
+  if (t.id === "pickPlay"){ stopAll(); S.current = t.value; memIdx = 0; lastTap = -1; save(); render(); }
   else if (t.id === "meSel"){ sc.me = t.value; memIdx = 0; save(); render(); }
   else if (t.id === "recFilter"){ recFilter = t.value; guideIdx = 0; render(); }
+  else if (t.id === "sceneSel" && t.value !== ""){ lastTap = +t.value; const el = document.querySelector('.it[data-i="' + t.value + '"]'); if (el) el.scrollIntoView({ block: "start", behavior: REDUCED ? "auto" : "smooth" }); updateRunUI(); }
   else if (t.dataset.cast === "voice"){ sc.cast[t.dataset.c] = Object.assign(sc.cast[t.dataset.c] || {}, { voice: t.value || undefined }); save(); }
   else if (t.dataset.cast === "pitch"){ sc.cast[t.dataset.c] = Object.assign(sc.cast[t.dataset.c] || {}, { pitch: +t.value }); save(); render(); }
   else if (t.id === "rateIn"){ S.settings.rate = +t.value; save(); render(); }
   else if (t.id === "pfIn"){ S.settings.pauseFactor = +t.value; save(); render(); }
   else if (t.id === "narrSel"){ S.settings.narrator = t.value; save(); }
   else if (t.id === "audioIn" && t.files[0] && pendingUploadKey){ takes.set(pendingUploadKey, t.files[0]); pendingUploadKey = null; render(); toast("Escucha la toma y pulsa Guardar si te gusta."); }
-  else if (t.id === "docIn" && t.files[0]){ draft.title = ($("#nTitle") || {}).value || draft.title; readDoc(t.files[0]); }
+  else if (t.id === "docIn" && t.files[0]){ readDoc(t.files[0]); }
   else if (t.id === "jsonIn" && t.files[0]){ importAny(await t.files[0].text()); }
 });
 let prevT;
 document.addEventListener("input", e => {
   if (e.target.id === "nRaw" || e.target.id === "nTitle"){
     draft.raw = $("#nRaw").value; draft.title = $("#nTitle").value;
-    clearTimeout(prevT); prevT = setTimeout(() => { const lines = parse(draft.raw); const p = $("#nPreview"); if (p) p.innerHTML = previewHTML(lines, castOf(lines)); const b = document.querySelector('[data-a="createScript"]'); if (b) b.disabled = !castOf(lines).length; }, 250);
+    clearTimeout(prevT); prevT = setTimeout(() => { const p = parse(draft.raw); const el = $("#nPreview"); if (el) el.innerHTML = previewHTML(p, castOf(p.lines)); const b = document.querySelector('[data-a="createScript"]'); if (b) b.disabled = !castOf(p.lines).length; }, 250);
   }
 });
 document.addEventListener("keydown", e => {
@@ -906,6 +1153,8 @@ document.addEventListener("keydown", e => {
   if (e.key === "Enter" && e.target.matches(".it.ln")) e.target.click();
   if (e.key === "Escape"){ if ($("#overlay").innerHTML) closeModal(); else if (RUN.active){ stopAll(); render(); } }
 });
+if (!IN_FRAME && "serviceWorker" in navigator && location.protocol === "https:"){ navigator.serviceWorker.register("sw.js").catch(() => {}); }
+save();
 render();
 </script>
 </body>
